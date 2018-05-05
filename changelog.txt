@@ -1,0 +1,25 @@
+This is a branch of GeneTrees v1, forked after the 0.4.0 release.
+The purpose of this branch is to simulate several trees simultaneously,
+rather than individual trees on their own.
+--------------------------------------------------------
+
+0.1.0 - 6/11/17 (FORGOT TO COMPILE)
+-Branched GeneTrees v1
+-The simulation world can now be scaled to any width and any height
+-The window can now be resized and panned around in
+-Trees are generated and simulated concurrently
+-For balance:
+--changed structure nodes to consume 4x as much fitness as leaf or root nodes; may revert
+--one sunlight and one nutrient are now converted into 4 fitness; may revert
+
+0.2.0 - 9/16/17
+-Added RainDrops and (partially) added GeneSeeds
+-GeneSeeds are seeds that a parent tree drops when it has accumulated enough fitness
+-GeneSeeds that touch the ground resemble their parent trees
+-RainDrops are an alternative form of energy; they can be collected by new Raincatcher nodes
+-Energy is collected by both Leaf and Raincatcher nodes
+-RainDrops fall through every kind of node except RainCatchers
+-A GeneTree now exchanges one energy point and one nutrient point for two fitness points
+-Added a display to determine how many ticks occur in one second
+-A "warmup" now occurs before any particle collisions with trees are calculated
+--During "warmup", the environment is populated with particles
