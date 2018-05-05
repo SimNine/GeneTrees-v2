@@ -8,6 +8,7 @@ LShift + Arrow Keys - Pan faster
 P - Pause simulation
 D - Toggle debug features
 Q - Stop visual rendering (but keep simulating; speeds up simulation)
+M - Toggle multithreading
 
 Click on a tree to track it.
 This displays additional information about it in the upper-left corner.

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import framework.GeneTrees;
+
 public class Environment {
 	private HashSet<GeneTree> trees = new HashSet<GeneTree>();
 	private HashSet<SunSpeck> sun = new HashSet<SunSpeck>();
@@ -22,6 +24,8 @@ public class Environment {
 	private long tickCount = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
+	
+	public boolean multithreading = false;
 	
 	public Environment() {
 		warmup(1000);
@@ -79,16 +83,9 @@ public class Environment {
 		return null;
 	}
 	
-	public void tick() {
-		long currTime = System.currentTimeMillis();
-		if (currTime - prevTime > 1000) {
-			System.out.println("ticks per sec: " + ticksThisSec);
-			ticksThisSec = 0;
-			prevTime = currTime;
-		}
-		
+	public void computeSun() {
 		// add new sunspecks
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			double pct = Math.random();
 			pct = pct * pct;
 			sun.add(new SunSpeck((int)(pct * (double)simWidth), 0));
@@ -103,23 +100,6 @@ public class Environment {
 			}
 		}
 		sun.removeAll(remSun); // remove all specks that have hit the ground
-		
-		// add new raindrops
-		for (int i = 0; i < 1; i++) {
-			double pct = Math.random();
-			pct = 1.0 - (pct * pct);
-			rain.add(new RainDrop((int)(pct * (double)simWidth), 0));
-		}
-		
-		// check collision of raindrops with ground
-		HashSet<RainDrop> remRain = new HashSet<RainDrop>();
-		for (RainDrop d : rain) { // for each raindrop
-			d.tick(); // tick each raindrop
-			if (d.getYPos() > groundLevel) { // check if raindrop has hit ground
-				remRain.add(d);
-			}
-		}
-		rain.removeAll(remRain); // remove all drops that have hit the ground
 		
 		// check collision of sunspecks with each tree
 		for (GeneTree t : trees) {
@@ -145,6 +125,25 @@ public class Environment {
 				sun.removeAll(rem);
 			}
 		}
+	}
+	
+	public void computeRain() {
+		// add new raindrops
+		for (int i = 0; i < 2; i++) {
+			double pct = Math.random();
+			pct = 1.0 - (pct * pct);
+			rain.add(new RainDrop((int)(pct * (double)simWidth), 0));
+		}
+		
+		// check collision of raindrops with ground
+		HashSet<RainDrop> remRain = new HashSet<RainDrop>();
+		for (RainDrop d : rain) { // for each raindrop
+			d.tick(); // tick each raindrop
+			if (d.getYPos() > groundLevel) { // check if raindrop has hit ground
+				remRain.add(d);
+			}
+		}
+		rain.removeAll(remRain); // remove all drops that have hit the ground
 		
 		// check collision of raindrops with each tree
 		for (GeneTree t : trees) {
@@ -169,6 +168,41 @@ public class Environment {
 				}
 				rain.removeAll(rem);
 			}
+		}
+	}
+	
+	public void tick() {
+		long currTime = System.currentTimeMillis();
+		if (currTime - prevTime > 1000) {
+			System.out.println("ticks per sec: " + ticksThisSec + " - multithreading: " + multithreading);
+			ticksThisSec = 0;
+			prevTime = currTime;
+		}
+		
+		Thread sunChecker = new Thread() {
+			public void run() {
+				GeneTrees.panel.getEnv().computeSun();
+			}
+		};
+		
+		Thread rainChecker = new Thread() {
+			public void run() {
+				GeneTrees.panel.getEnv().computeRain();
+			}
+		};
+		
+		if (multithreading) {
+			sunChecker.start();
+			rainChecker.start();
+			try {
+				sunChecker.join();
+				rainChecker.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} else {
+			sunChecker.run();
+			rainChecker.run();
 		}
 		
 		// tick each tree's root nodes and wasted fitness

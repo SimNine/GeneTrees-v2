@@ -216,19 +216,19 @@ public class GeneTree implements Comparable<GeneTree> {
 		this.age = a;
 	}
 
-	public long getNutrients() {
+	synchronized public long getNutrients() {
 		return nutrients;
 	}
 	
-	public void setNutrients(long nu) {
+	synchronized public void setNutrients(long nu) {
 		nutrients = nu;
 	}
 
-	public long getEnergy() {
+	synchronized public long getEnergy() {
 		return energy;
 	}
 	
-	public void setEnergy(long en) {
+	synchronized public void setEnergy(long en) {
 		energy = en;
 	}
 

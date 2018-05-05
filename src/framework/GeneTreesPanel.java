@@ -73,6 +73,8 @@ public class GeneTreesPanel extends JPanel {
 				case KeyEvent.VK_Q:
 					drawing = !drawing;
 					break;
+				case KeyEvent.VK_M:
+					env.multithreading = !env.multithreading;
 				}
 			}
 			public void keyReleased(KeyEvent e) {

@@ -1,4 +1,4 @@
-This is a branch of GeneTrees v1, forked after the 0.4.0 release.
+This project is a branch of GeneTrees, forked after the 0.4.0 release.
 The purpose of this branch is to simulate several trees simultaneously,
 rather than individual trees on their own.
 --------------------------------------------------------
@@ -23,3 +23,9 @@ rather than individual trees on their own.
 -Added a display to determine how many ticks occur in one second
 -A "warmup" now occurs before any particle collisions with trees are calculated
 --During "warmup", the environment is populated with particles
+
+0.2.1 - 9/16/17
+-Added multithreading functionality
+-Multithreading can be toggled by pressing "m"
+-Each tick, one thread computes collisions of SunSpecks with trees, 
+	while another thread computes collisions of RainDrops with trees
