@@ -143,11 +143,13 @@ public class GeneTreesPanel extends JPanel {
 	public void paintComponent(Graphics g) {
 		// draw the sky
 		g.setColor(new Color(146, 184, 244));
-		g.fillRect(0, 0, this.getWidth(), env.getGroundLevel() - yScr);
+		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		// draw the ground
-		g.setColor(new Color(183, 85, 23));
-		g.fillRect(0, env.getGroundLevel() - yScr, this.getWidth(), (yScr + this.getHeight()) - env.getGroundLevel());
+		//g.drawImage(env.getGroundImg(), 0, 0, null);
+		g.drawImage(env.getGroundImg(), -xScr, -yScr, null);
+		//g.setColor(new Color(183, 85, 23));
+		//g.fillRect(0, env.getGroundLevel() - yScr, this.getWidth(), (yScr + this.getHeight()) - env.getGroundLevel());
 		
 		// draw each tree
 		for (GeneTree t : env.getTrees()) {
@@ -168,17 +170,15 @@ public class GeneTreesPanel extends JPanel {
 		g.setColor(new Color(255, 0, 0));
 		g.drawRect(-xScr, -yScr, env.getSimWidth(), env.getSimHeight());
 		
+		// draw the selected tree display box
+		drawTrackedTree(g);
+		
 		// draw the debug text
 		int fh = 15; // fontHeight
 		int ln = 1; // lineNum
-		g.setColor(Color.WHITE);
+		g.setColor(Color.BLACK);
 		g.drawString("Tick Speed: " + tickSpeed, 0, fh*ln++);
 		g.drawString("Tick number: " + tickCount, 0, fh*ln++);
-		g.drawString("Pause simulation: P", 0, fh*ln++);
-		ln++;
-		g.drawString("Save: F1", 0, fh*ln++);
-		g.drawString("Load: F2", 0, fh*ln++);
-		g.drawString("Run continuously, saving every 10k ticks: R", 0, fh*ln++);
 		ln++;
 		g.drawString("Screen Top-left: " + xScr + "," + yScr, 0, fh*ln++);
 		ln++;
@@ -195,6 +195,31 @@ public class GeneTreesPanel extends JPanel {
 		g.drawString("Maximum fitness: " + env.getMaxFitness(), 0, fh*ln++);
 		g.drawString("Average fitness: " + env.getAvgFitness(), 0, fh*ln++);
 		g.drawString("Number of trees: " + env.getTrees().size(), 0, fh*ln++);
+		ln++;
+		g.drawString("Controls:", 0, fh*ln++);
+		g.drawString("Pan screen: arrow keys", 0, fh*ln++);
+		g.drawString("Pan faster: LShift", 0, fh*ln++);
+		g.drawString("Pause simulation: P", 0, fh*ln++);
+		g.drawString("Pause drawing (but continue simulation): Q", 0, fh*ln++);
+		g.drawString("Toggle debug features: D", 0, fh*ln++);
+		g.drawString("Toggle multithreading: M", 0, fh*ln++);
+	}
+	
+	private void drawTrackedTree(Graphics g) {
+		if (trackedTree == null)
+			return;
+		
+		int w = trackedTree.getxMax()-trackedTree.getxMin();
+		int h = trackedTree.getyMax()-trackedTree.getyMin();
+		
+		g.setColor(Color.WHITE);
+		g.fillRect(getWidth() - w - 30, getHeight() - h - 30, w + 20, h + 20);
+		trackedTree.draw(g, 
+						 trackedTree.getxMin() - (getWidth() - w - 20), 
+						 trackedTree.getyMin() - (getHeight() - h - 20));
+		
+		g.setColor(Color.BLACK);
+		g.drawString("Selected Tree:", getWidth() - w - 30, getHeight() - h - 15);
 	}
 	
 	public void stopTime() {

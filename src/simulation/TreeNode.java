@@ -10,6 +10,8 @@ public class TreeNode {
 	private int xPos; // xPos of the center
 	private int yPos; // yPos of the center
 	
+	private boolean activated = false; // whether this node has been used (or is vestigial)
+	
 	private GeneTree owner;
 	private TreeNode parent;
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
@@ -33,7 +35,7 @@ public class TreeNode {
 	// creates a new TreeNode with given owner and parent node
 	public TreeNode(int x, int y, GeneTree owner, TreeNode parent) {
 		this.size = (int)(Math.random()*9.0) + 20;
-		this.type = NodeType.values()[(int)(Math.random()*3.0)];
+		this.type = NodeType.values()[(int)(Math.random()*4.0)];
 		this.parent = parent;
 		this.owner = owner;
 		this.dist = Math.random()*30.0 + 40;
@@ -298,5 +300,13 @@ public class TreeNode {
 			}
 		}
 		return ret;
+	}
+	
+	public boolean isActivated() {
+		return activated;
+	}
+	
+	public void setActivated(boolean b) {
+		activated = b;
 	}
 }

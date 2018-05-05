@@ -1,2 +1,2 @@
-java -jar 0.2.1.jar
+java -jar 0.3.0.jar
 pause

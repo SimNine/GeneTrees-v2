@@ -55,11 +55,12 @@ public class GeneTree implements Comparable<GeneTree> {
 		width = Math.abs(xMax) - Math.abs(xMin);
 		height = Math.abs(yMax) - Math.abs(yMin);
 	}
-
+	
 	public void draw(Graphics g) {
-		int xScr = GeneTrees.panel.getXScr();
-		int yScr = GeneTrees.panel.getYScr();
+		draw(g, GeneTrees.panel.getXScr(), GeneTrees.panel.getYScr());
+	}
 
+	public void draw(Graphics g, int xScr, int yScr) {
 		for (TreeNode n : nodes) {
 			// if this isn't the root node, draw its branch to its parent
 			if (n.getParent() != null) {
@@ -141,7 +142,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	public void tick() {
 		for (TreeNode n : nodes) {
 			// if this is a root node, gradually increment its fitness
-			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getEnv().getGroundLevel()) {
+			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getEnv().getGroundLevel(n.getXPos())) {
 				nutrients += 3 * n.getSize();
 			}
 
@@ -149,8 +150,10 @@ public class GeneTree implements Comparable<GeneTree> {
 			// moreso if it is a structure node
 			if (n.getType() == NodeType.Struct) {
 				fitness -= n.getSize() * 2;
-			} else {
+			} else if (n.isActivated() || n.getType() == NodeType.Root) {
 				fitness -= n.getSize();
+			} else {
+				fitness -= n.getSize() * 4;
 			}
 		}
 
@@ -268,11 +271,11 @@ public class GeneTree implements Comparable<GeneTree> {
 		return (x > xMin && x < xMax && y > yMin && y < yMax);
 	}
 
-	public void setFitnessPercentage(double d) {
+	synchronized public void setFitnessPercentage(double d) {
 		fitnessPercentage = d;
 	}
 
-	public double getFitnessPercentage() {
+	synchronized public double getFitnessPercentage() {
 		return fitnessPercentage;
 	}
 }

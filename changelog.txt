@@ -29,3 +29,9 @@ rather than individual trees on their own.
 -Multithreading can be toggled by pressing "m"
 -Each tick, one thread computes collisions of SunSpecks with trees, 
 	while another thread computes collisions of RainDrops with trees
+	
+0.3.0 - 9/29/17
+-added another thread to compute fitness percentiles of trees
+-changed color of info/debug text from white to black
+-added display box for tracked tree in bottom-right corner
+-the landscape is now a layered trig function (height is a function of displacement from x=0)
