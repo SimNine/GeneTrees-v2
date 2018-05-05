@@ -73,6 +73,7 @@ public class Environment {
 		}
 	}
 	
+	// simulate weather particle production for some arbitrary number of ticks
 	public void warmup(int numTicks) {
 		for (int i = 0; i < numTicks; i++) {
 			// add new sunspecks
@@ -111,6 +112,7 @@ public class Environment {
 		}
 	}
 	
+	// gets a tree at a position
 	public GeneTree getTreeAt(int x, int y) {
 		for (GeneTree t : trees) {
 			if (t.isOverTree(x, y)) {
@@ -120,6 +122,7 @@ public class Environment {
 		return null;
 	}
 	
+	// computes the collision of all sunspecks with the ground and with trees
 	public void computeSun() {
 		// add new sunspecks
 		for (int i = 0; i < 2; i++) {
@@ -165,6 +168,7 @@ public class Environment {
 		}
 	}
 	
+	// check collision of raindrops with ground and with trees
 	public void computeRain() {
 		// add new raindrops
 		for (int i = 0; i < 2; i++) {
@@ -210,6 +214,7 @@ public class Environment {
 		}
 	}
 	
+	// computes the fitness of each tree
 	public void computeFitness() {		
 		// recompute fitness of each tree
 		long totalFitness = 0;
@@ -234,7 +239,8 @@ public class Environment {
 	public void tick() {
 		long currTime = System.currentTimeMillis();
 		if (currTime - prevTime > 1000) {
-			System.out.println("ticks per sec: " + ticksThisSec + " - multithreading: " + multithreading);
+			if (GeneTrees.debug)
+				System.out.println("ticks per sec: " + ticksThisSec + " - multithreading: " + multithreading);
 			ticksThisSec = 0;
 			prevTime = currTime;
 		}
@@ -293,27 +299,58 @@ public class Environment {
 			maxAlltime = maxFitness;
 		if (minFitness < minAlltime)
 			minAlltime = minFitness;
-		GeneTrees.fitnessPanel.addPoint(0, numGens, maxFitness);
-		GeneTrees.fitnessPanel.addPoint(1, numGens, avgFitness);
-		GeneTrees.fitnessPanel.addPoint(2, numGens, minFitness);
-		GeneTrees.fitnessPanel.setXBounds(-1, numGens);
-		GeneTrees.fitnessPanel.setYBounds(minAlltime, maxAlltime);
-		GeneTrees.fitnessPanel.repaint();
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MAX, numGens, maxFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG, numGens, avgFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MIN, numGens, minFitness);
 		
 		// update population graph
 		if (trees.size() > maxTreesAlltime)
 			maxTreesAlltime = trees.size();
-		GeneTrees.populationPanel.addPoint(0, numGens, trees.size());
-		GeneTrees.populationPanel.setXBounds(-1, numGens);
-		GeneTrees.populationPanel.setYBounds(-1, maxTreesAlltime);
-		GeneTrees.populationPanel.repaint();
+		GeneTrees.populationPanel.addPoint(GeneTrees.GRAPHDATA_POPULATION, numGens, trees.size());
 		
+		// update tree stat graph
+		double treeNodes = 0;
+		double treeLeaves = 0;
+		double treeRaincatchers = 0;
+		double treeStructs = 0;
+		double treeRoots = 0;
+		double treeSeeddroppers = 0;
+		for (GeneTree t : trees) {
+			for (TreeNode n : t.getAllNodes()) {
+				if (n.getType() == NodeType.Leaf)
+					treeLeaves++;
+				if (n.getType() == NodeType.Raincatcher)
+					treeRaincatchers++;
+				if (n.getType() == NodeType.Struct)
+					treeStructs++;
+				if (n.getType() == NodeType.Root)
+					treeRoots++;
+				if (n.getType() == NodeType.SeedDropper)
+					treeSeeddroppers++;
+			}
+			treeNodes += t.getNumNodes();
+		}
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ALL, numGens, treeNodes/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_LEAF, numGens, treeLeaves/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_RAINCATCHER, numGens, treeRaincatchers/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_STRUCTURE, numGens, treeStructs/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ROOT, numGens, treeRoots/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER, numGens, treeSeeddroppers/trees.size());
+		
+		// update weather stat graph
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS, numGens, sun.size());
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, numGens, rain.size());
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, numGens, seeds.size());
+		
+		// reset the current tick number, increment the generation number
 		tickCount = 0;
 		numGens++;
 
-		List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);
-		Collections.sort(treesSorted);
+		// sort the array of trees in order to remove the ones
+		//List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);
+		//Collections.sort(treesSorted);
 		
+		// check all trees for which to remove
 		HashSet<GeneTree> toRemove = new HashSet<GeneTree>();
 		for (GeneTree t : trees) {
 			if (t.getFitness() < 0) { // ( || t.getFitnessPercentage() < 0.4) {
@@ -322,6 +359,7 @@ public class Environment {
 		}
 		trees.removeAll(toRemove);
 		
+		// check trees for which to reproduce
 		HashSet<GeneTree> toAdd = new HashSet<GeneTree>();
 		for (GeneTree t : trees) {
 			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {

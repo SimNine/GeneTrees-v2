@@ -3,10 +3,12 @@ package framework;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
@@ -14,10 +16,13 @@ import simulation.Environment;
 import simulation.GeneTree;
 import simulation.NodeType;
 import simulation.TreeNode;
+import urf.Pair;
+import urf.grapher.GraphDataset;
 
 public class Loader {
 	
 	private static File saveDir = new File("saves");
+	private static final int SAVEFILE_VERSION = 1;
 	
 	public static void saveGame() {
 		GeneTrees.panel.stopTime();
@@ -53,6 +58,24 @@ public class Loader {
             System.out.print("saving " + filename + "...");
             save.createNewFile();
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(save));
+            
+            // save the file version
+            oos.writeInt(SAVEFILE_VERSION);
+            
+            // save all plot points
+            savePlot(oos, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MAX));
+            savePlot(oos, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_AVG));
+            savePlot(oos, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MIN));
+            savePlot(oos, GeneTrees.populationPanel.getDataset(GeneTrees.GRAPHDATA_POPULATION));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
+            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
+            savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS));
+            savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS));
+            savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS));
             
             // get all the genetrees
             HashSet<GeneTree> trees = GeneTrees.panel.getEnv().getTrees();
@@ -136,6 +159,22 @@ public class Loader {
         
         GeneTrees.panel.startTime();
     }
+	
+	private static void savePlot(ObjectOutputStream oos, GraphDataset gSet) throws IOException {
+		LinkedList<Pair<Double, Double>> set = gSet.getPoints();
+		oos.writeInt(set.size());
+        for (Pair<Double, Double> p : set) {
+        	oos.writeDouble(p.a);
+        	oos.writeDouble(p.b);
+        }
+	}
+	
+	private static void readPlot(ObjectInputStream ois, GraphDataset set) throws IOException {
+		int numPoints = ois.readInt();
+		for (int i = 0; i < numPoints; i++) {
+			set.addPoint(ois.readDouble(), ois.readDouble());
+		}
+	}
     
     public static void loadGame() {
     	GeneTrees.panel.stopTime();
@@ -151,6 +190,24 @@ public class Loader {
             System.out.print("loading " + filename + "... ");
             File file = new File(saveDir, filename);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+            
+            // load the savefile version
+            int savefile_version = ois.readInt();
+            
+            // load all plot points
+            readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MAX));
+            readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_AVG));
+            readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MIN));
+            readPlot(ois, GeneTrees.populationPanel.getDataset(GeneTrees.GRAPHDATA_POPULATION));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
+            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
+            readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS));
+            readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS));
+            readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS));
             
             // read number of trees
             int numTrees = ois.readInt();

@@ -118,10 +118,6 @@ public class GeneTreesPanel extends JPanel {
 		});
 	}
 	
-	public void init() {
-		time.start();
-	}
-	
 	public void time() {
     	if (ticking) {
     		checkKeys();

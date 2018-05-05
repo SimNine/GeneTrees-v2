@@ -18,3 +18,8 @@ This displays additional information about it in the upper-left corner,
 and displays the tree seperately in the lower-right corner.
 
 The graph windows cannot be reopened once closed.
+Graph window controls:
+A and D - Zoom horizontally
+W and S - Zoom vertically
+R - autofit to data
+Arrow keys - Pan
