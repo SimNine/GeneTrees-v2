@@ -28,6 +28,9 @@ public class Environment {
 	private long minFitness = 0;
 	private long maxFitness = 0;
 	private long avgFitness = 0;
+	private long minAlltime = Long.MAX_VALUE;
+	private long maxAlltime = Long.MIN_VALUE;
+	private long maxTreesAlltime = Long.MIN_VALUE;
 
 	private long tickCount = 0;
 	private int ticksThisSec = 0;
@@ -285,6 +288,26 @@ public class Environment {
 	}
 	
 	private void reproduce() {
+		// update fitnesss graph
+		if (maxFitness > maxAlltime)
+			maxAlltime = maxFitness;
+		if (minFitness < minAlltime)
+			minAlltime = minFitness;
+		GeneTrees.fitnessPanel.addPoint(0, numGens, maxFitness);
+		GeneTrees.fitnessPanel.addPoint(1, numGens, avgFitness);
+		GeneTrees.fitnessPanel.addPoint(2, numGens, minFitness);
+		GeneTrees.fitnessPanel.setXBounds(-1, numGens);
+		GeneTrees.fitnessPanel.setYBounds(minAlltime, maxAlltime);
+		GeneTrees.fitnessPanel.repaint();
+		
+		// update population graph
+		if (trees.size() > maxTreesAlltime)
+			maxTreesAlltime = trees.size();
+		GeneTrees.populationPanel.addPoint(0, numGens, trees.size());
+		GeneTrees.populationPanel.setXBounds(-1, numGens);
+		GeneTrees.populationPanel.setYBounds(-1, maxTreesAlltime);
+		GeneTrees.populationPanel.repaint();
+		
 		tickCount = 0;
 		numGens++;
 

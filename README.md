@@ -16,3 +16,5 @@ M - Toggle multithreading
 Click on a tree to track it.
 This displays additional information about it in the upper-left corner,
 and displays the tree seperately in the lower-right corner.
+
+The graph windows cannot be reopened once closed.
