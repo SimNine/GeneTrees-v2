@@ -23,10 +23,9 @@ public class GeneTreesPanel extends JPanel {
 	private HashSet<Integer> keys = new HashSet<Integer>();
 	
 	private GeneTree trackedTree = null;
-	Environment env = new Environment();
+	Environment env;
 	
 	private int tickSpeed = 1;
-	private long tickCount = 0;
 	
 	private int xScr = 0;
 	private int yScr = 0;
@@ -42,13 +41,30 @@ public class GeneTreesPanel extends JPanel {
         	time();
         }
 	});
-	private long sysTime;
 	
 	public GeneTreesPanel(int width, int height) {
 		super();
 		setFocusable(true);
 		requestFocusInWindow();
 		this.setSize(width, height);
+		
+		// create environment
+		double[] gFreq = { 0.002,
+						   0.01,
+						   0.04,
+						   0.2,
+						   0.5 };
+		double[] gAmp = { Math.random()*500,
+				   		  Math.random()*200,
+				   		  Math.random()*80,
+				   		  Math.random()*5,
+				   		  Math.random()*5 };
+		double[] gDisp = { Math.random()*500,
+						   Math.random()*500,
+						   Math.random()*500,
+				   		   Math.random()*500,
+				   		   Math.random()*500 };
+		env = new Environment(6000, 2000, 600, gFreq, gAmp, gDisp);
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
@@ -62,10 +78,10 @@ public class GeneTreesPanel extends JPanel {
 					GeneTrees.debug = !GeneTrees.debug;
 					break;
 				case KeyEvent.VK_F1:
-					//Loader.saveGame();
+					Loader.saveGame();
 					break;
 				case KeyEvent.VK_F2:
-					//Loader.loadGame();
+					Loader.loadGame();
 					break;
 				case KeyEvent.VK_R:
 					//continuousGenAndSave();
@@ -103,7 +119,6 @@ public class GeneTreesPanel extends JPanel {
 	}
 	
 	public void init() {
-		sysTime = System.currentTimeMillis();
 		time.start();
 	}
 	
@@ -112,10 +127,8 @@ public class GeneTreesPanel extends JPanel {
     		checkKeys();
     		env.tick();
     		
-    		tickCount++;
-    		if (tickCount >= 1000) {
+    		if (env.getTickCount() >= 1000) {
     			repaint();
-    			tickCount = 0;
     		}
     	}
     	if (drawing)
@@ -126,7 +139,10 @@ public class GeneTreesPanel extends JPanel {
 		// check for panning keys
 		int mult = 1;
 		if (keys.contains(KeyEvent.VK_SHIFT)) {
-			mult = 3;
+			mult = 8;
+			if (keys.contains(KeyEvent.VK_CONTROL)) {
+				mult = 20;
+			}
 		}
 		if (keys.contains(KeyEvent.VK_UP)) {
 			yScr -= mult;
@@ -146,10 +162,7 @@ public class GeneTreesPanel extends JPanel {
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		// draw the ground
-		//g.drawImage(env.getGroundImg(), 0, 0, null);
 		g.drawImage(env.getGroundImg(), -xScr, -yScr, null);
-		//g.setColor(new Color(183, 85, 23));
-		//g.fillRect(0, env.getGroundLevel() - yScr, this.getWidth(), (yScr + this.getHeight()) - env.getGroundLevel());
 		
 		// draw each tree
 		for (GeneTree t : env.getTrees()) {
@@ -178,7 +191,8 @@ public class GeneTreesPanel extends JPanel {
 		int ln = 1; // lineNum
 		g.setColor(Color.BLACK);
 		g.drawString("Tick Speed: " + tickSpeed, 0, fh*ln++);
-		g.drawString("Tick number: " + tickCount, 0, fh*ln++);
+		g.drawString("Tick number: " + env.getTickCount(), 0, fh*ln++);
+		g.drawString("Generation number: " + env.getNumGens(), 0, fh*ln++);
 		ln++;
 		g.drawString("Screen Top-left: " + xScr + "," + yScr, 0, fh*ln++);
 		ln++;

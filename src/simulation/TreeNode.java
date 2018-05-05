@@ -16,6 +16,11 @@ public class TreeNode {
 	private TreeNode parent;
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
 	
+	// creates a blank treenode for I/O
+	public TreeNode() {
+		// do nothing
+	}
+	
 	// deeply, recursively clones a TreeNode
 	public TreeNode(int x, int y, GeneTree owner, TreeNode parent, TreeNode tgt) {
 		this.size = tgt.getSize();
@@ -141,6 +146,9 @@ public class TreeNode {
 			}
 			return;
 		}
+		
+		// fix owner (if not fixed)
+		owner = parent.getOwner();
 		
 		// angle correction
 		while (angle > 360) {
@@ -308,5 +316,13 @@ public class TreeNode {
 	
 	public void setActivated(boolean b) {
 		activated = b;
+	}
+	
+	public void setXPos(int xPos) {
+		this.xPos = xPos;
+	}
+	
+	public void setYPos(int yPos) {
+		this.yPos = yPos;
 	}
 }

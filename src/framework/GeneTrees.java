@@ -8,7 +8,7 @@ import javax.swing.SwingUtilities;
 //import urf.GraphWindow;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.3.0";
+	public static final String ver = "0.4.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	public static boolean debug = true;
@@ -37,7 +37,7 @@ public class GeneTrees implements Runnable {
 		
 		/*
 		JFrame graphFrame = new JFrame("Graph");
-		GraphWindow graphPanel = new GraphWindow();
+		GraphWindow<Integer, Double> graphPanel = new GraphWindow<Integer, Double>();
 		graphFrame.setVisible(true);
 		graphFrame.setSize(600, 600);
 		graphFrame.add(graphPanel);

@@ -35,3 +35,6 @@ rather than individual trees on their own.
 -changed color of info/debug text from white to black
 -added display box for tracked tree in bottom-right corner
 -the landscape is now a layered trig function (height is a function of displacement from x=0)
+
+0.4.0 - 10/31/17
+-Rebuilt the save system so that long-term runs can be carried out

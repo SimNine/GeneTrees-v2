@@ -10,19 +10,21 @@ import java.util.HashSet;
 
 import javax.swing.JOptionPane;
 
+import simulation.Environment;
 import simulation.GeneTree;
+import simulation.NodeType;
 import simulation.TreeNode;
 
 public class Loader {
 	
-	private static File saveDir = new File("savedgames");
+	private static File saveDir = new File("saves");
 	
 	public static void saveGame() {
 		GeneTrees.panel.stopTime();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
-        String filename = JOptionPane.showInputDialog(GeneTrees.panel, "Save Level", null);
+        String filename = JOptionPane.showInputDialog(GeneTrees.panel, "Save", null);
         
         saveGame(filename);
 	}
@@ -32,8 +34,8 @@ public class Loader {
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
-        String filename = saveName + ".gt";
-        if (filename.equals("null.gt")) {
+        String filename = saveName + ".gt2";
+        if (filename.equals("null.gt2")) {
         	GeneTrees.panel.startTime();
         	return;
         }
@@ -53,31 +55,32 @@ public class Loader {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(save));
             
             // get all the genetrees
-            ArrayList<GeneTree> trees = GeneTrees.panel.getTrees();
+            HashSet<GeneTree> trees = GeneTrees.panel.getEnv().getTrees();
             
             // write number of trees
             oos.writeInt(trees.size());
             
             // for each tree
-            for (int i = 0; i < trees.size(); i++) {
+            for (GeneTree t : trees) {
             	// get current tree and its nodes
-            	GeneTree curr = trees.get(i);
+            	GeneTree curr = t;
             	ArrayList<TreeNode> nodes = curr.getAllNodes();
             	
                 // write number of nodes in current tree
                 oos.writeInt(curr.getNumNodes());
                 // write age of current tree
                 oos.writeInt(curr.getAge());
-                // write origin gen of current tree
-                oos.writeInt(curr.getOrigin());
+                
+                // write the position of this tree's root
+                oos.writeInt(curr.getRoot().getXPos());
+                oos.writeInt(curr.getRoot().getYPos());
                 
                 // for each node
-                for (int j = 0; j < nodes.size(); j++) {
-                	// get the current node
-                	TreeNode node = nodes.get(j);
+                for (TreeNode n : nodes) {
+                	TreeNode node = n;
                 	
                 	// write its type, size, angle, and distance
-                	oos.writeInt(node.getType());
+                	oos.writeInt(NodeType.toInt(node.getType()));
                 	oos.writeInt(node.getSize());
                 	oos.writeInt(node.getAngle());
                 	oos.writeDouble(node.getDist());
@@ -88,10 +91,10 @@ public class Loader {
                 		// if this is the root, write a dummy value
                 		oos.writeInt(-1);
                 	} else {
-	                	// find the index of its parent
-	                	int parentIndex = nodes.indexOf(parent);
-	                	// write the index of its parent
-	                	oos.writeInt(parentIndex);
+                    	// find the index of its parent
+                    	int parentIndex = nodes.indexOf(parent);
+                    	// write the index of its parent
+                    	oos.writeInt(parentIndex);
                 	}
                 	
                 	// get its children
@@ -108,8 +111,18 @@ public class Loader {
                 }
             }
             
-            // write the number of this generation
-            oos.writeInt(GeneTrees.panel.getCurrGen());
+            // write all environment specific info
+            Environment env = GeneTrees.panel.env;
+            oos.writeInt(env.getNumGens());
+            oos.writeInt(env.getSimWidth());
+            oos.writeInt(env.getSimHeight());
+            oos.writeInt(env.getGroundBaseline());
+            oos.writeInt(env.getGroundDegree());
+            for (int i = 0; i < env.getGroundDegree(); i++) {
+            	oos.writeDouble(env.getGroundFreq()[i]);
+            	oos.writeDouble(env.getGroundAmp()[i]);
+            	oos.writeDouble(env.getGroundDisp()[i]);
+            }
             
             // done, finish up
             oos.flush();
@@ -127,8 +140,8 @@ public class Loader {
     public static void loadGame() {
     	GeneTrees.panel.stopTime();
     	
-        String filename = JOptionPane.showInputDialog(null, "load a generation", null) + ".gt";
-        if (filename.equals("null.gt")) {
+        String filename = JOptionPane.showInputDialog(null, "load a generation", null) + ".gt2";
+        if (filename.equals("null.gt2")) {
         	GeneTrees.panel.startTime();
         	return;
         }
@@ -147,12 +160,11 @@ public class Loader {
             
             // for each tree
             for (int i = 0; i < numTrees; i++) {
-            	// get number of nodes in the tree
             	int numNodes = ois.readInt();
-            	// get age of current tree
             	int age = ois.readInt();
-            	// get origin gen of current tree
-            	int origin = ois.readInt();
+            	
+            	int xPos = ois.readInt();
+            	int yPos = ois.readInt();
             	
             	// initialize list of nodes
             	ArrayList<TreeNode> nodes = new ArrayList<TreeNode>(numNodes);
@@ -167,7 +179,7 @@ public class Loader {
             		TreeNode newNode = new TreeNode();
             		
             		// read and set its type, size, angle, and distance
-            		newNode.setType(ois.readInt());
+            		newNode.setType(NodeType.toType(ois.readInt()));
             		newNode.setSize(ois.readInt());
             		newNode.setAngle(ois.readInt());
             		newNode.setDistance(ois.readDouble());
@@ -212,6 +224,8 @@ public class Loader {
             		// if this node's parent index has the dummy value of -1, it is the root
             		if (parentIndex == -1) {
             			currNode.setParent(null);
+            			currNode.setXPos(xPos);
+            			currNode.setYPos(yPos);
             			root = currNode;
             		} else {
                 		currNode.setParent(nodes.get(parentIndex));
@@ -232,7 +246,6 @@ public class Loader {
             	
             	// set newTree's attributes
             	newTree.setAge(age);
-            	newTree.setOrigin(origin);
             	
             	// once more, iterate through each node to set their owner tree
             	for (int j = 0; j < numNodes; j++) {
@@ -243,8 +256,35 @@ public class Loader {
             	trees.add(i, newTree);
             }
             
-            // now, set the list of trees for the simulation
-            GeneTrees.panel.reset(trees, ois.readInt());
+            // rebuild the environment
+            int eGens = ois.readInt();
+            int eWidth = ois.readInt();
+            int eHeight = ois.readInt();
+            int gBaseline = ois.readInt();
+            int gDegree = ois.readInt();
+            ArrayList<Double> gFreq = new ArrayList<Double>();
+            ArrayList<Double> gAmp = new ArrayList<Double>();
+            ArrayList<Double> gDisp = new ArrayList<Double>();
+            for (int i = 0; i < gDegree; i++) {
+            	gFreq.add(ois.readDouble());
+            	gAmp.add(ois.readDouble());
+            	gDisp.add(ois.readDouble());
+            }
+            double[] gFreqs = new double[gFreq.size()];
+            double[] gAmps = new double[gAmp.size()];
+            double[] gDisps = new double[gDisp.size()];
+            for (int i = 0; i < gDegree; i++) {
+            	gFreqs[i] = gFreq.get(i);
+            	gAmps[i] = gAmp.get(i);
+            	gDisps[i] = gDisp.get(i);
+            }
+            GeneTrees.panel.env = new Environment(eWidth, eHeight, gBaseline, gFreqs, gAmps, gDisps);
+            HashSet<GeneTree> treeSet = new HashSet<GeneTree>();
+            for (GeneTree t : trees) {
+            	treeSet.add(t);
+            }
+            GeneTrees.panel.env.setTrees(treeSet);
+            GeneTrees.panel.env.setNumGens(eGens);
             
             // finish up
             ois.close();

@@ -32,7 +32,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	// creates a new, blank genetree with a newly-assembled node structure
 	// rooted at the given node
 	// for I/O purposes
-	public GeneTree(TreeNode n, int x, int y) {
+	public GeneTree(TreeNode n) {
 		root = n;
 		this.init();
 
@@ -51,6 +51,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	}
 
 	private void init() {
+		root.setOwner(this);
 		root.initLocation();
 		width = Math.abs(xMax) - Math.abs(xMin);
 		height = Math.abs(yMax) - Math.abs(yMin);

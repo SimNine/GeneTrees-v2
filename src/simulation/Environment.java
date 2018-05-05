@@ -16,21 +16,14 @@ public class Environment {
 	private HashSet<RainDrop> rain = new HashSet<RainDrop>();
 	
 	private BufferedImage groundImg;
-	private double[] groundFreq = { 0.002,
-									0.01,
-									0.04,
-									0.2 };
-	private double[] groundAmp = { Math.random()*500,
-								   Math.random()*200,
-								   Math.random()*80,
-								   Math.random()*5 };
-	private double[] groundDisp = { Math.random()*500,
-									Math.random()*500,
-									Math.random()*500,
-									Math.random()*500};
+	private int groundBaseline;
+	private int groundDegree;
+	private double[] groundFreq;
+	private double[] groundAmp;
+	private double[] groundDisp;
 	
-	private int simWidth = 3000;
-	private int simHeight = 2000;
+	private int simWidth;
+	private int simHeight;
 
 	private long minFitness = 0;
 	private long maxFitness = 0;
@@ -39,10 +32,25 @@ public class Environment {
 	private long tickCount = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
+	private int numGens = 0;
 	
 	public boolean multithreading = false;
 	
-	public Environment() {
+	// build an environment
+	public Environment(int sWidth, int sHeight, int gBaseline, double[] gFreq, double[] gAmp, double[] gDisp) {
+		groundBaseline = gBaseline;
+		groundFreq = gFreq;
+		groundAmp = gAmp;
+		groundDisp = gDisp;
+		
+		int min = Math.min(groundFreq.length, groundAmp.length);
+		min = Math.min(min, groundDisp.length);
+		groundDegree = min;
+		
+		simWidth = sWidth;
+		simHeight = sHeight;
+		
+		// create the background image
 		groundImg = new BufferedImage(simWidth, simHeight, BufferedImage.TYPE_4BYTE_ABGR);
 		for (int x = 0; x < groundImg.getWidth(); x++) {
 			double m = getGroundLevel(x);
@@ -52,6 +60,7 @@ public class Environment {
 			}
 		}
 		
+		// warm up the environment
 		warmup(1000);
 		
 		// populate the list of trees
@@ -277,6 +286,7 @@ public class Environment {
 	
 	private void reproduce() {
 		tickCount = 0;
+		numGens++;
 
 		List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);
 		Collections.sort(treesSorted);
@@ -309,11 +319,12 @@ public class Environment {
 	}
 	
 	public double getGroundLevel(double x) {
-		return Math.cos(groundFreq[0]*x + groundDisp[0])*groundAmp[0] + 
-			   Math.cos(groundFreq[1]*x + groundDisp[1])*groundAmp[1] + 
-			   Math.cos(groundFreq[2]*x + groundDisp[2])*groundAmp[2] + 
-			   Math.cos(groundFreq[3]*x + groundDisp[3])*groundAmp[3] +
-			   600;
+		double sum = 0;
+		for (int i = 0; i < groundDegree; i++) {
+			sum += Math.cos(groundFreq[i]*x + groundDisp[i])*groundAmp[i];
+		}
+		sum += groundBaseline;
+		return sum;
 	}
 	
 	public BufferedImage getGroundImg() {
@@ -322,6 +333,10 @@ public class Environment {
 	
 	public HashSet<GeneTree> getTrees() {
 		return trees;
+	}
+	
+	public void setTrees(HashSet<GeneTree> t) {
+		trees = t;
 	}
 	
 	public HashSet<SunSpeck> getSun() {
@@ -354,5 +369,37 @@ public class Environment {
 
 	public long getAvgFitness() {
 		return avgFitness;
+	}
+	
+	public double[] getGroundFreq() {
+		return groundFreq;
+	}
+	
+	public double[] getGroundAmp() {
+		return groundAmp;
+	}
+	
+	public double[] getGroundDisp() {
+		return groundDisp;
+	}
+	
+	public int getGroundBaseline() {
+		return groundBaseline;
+	}
+	
+	public int getGroundDegree() {
+		return groundDegree;
+	}
+	
+	public long getTickCount() {
+		return tickCount;
+	}
+	
+	public int getNumGens() {
+		return numGens;
+	}
+	
+	public void setNumGens(int n) {
+		numGens = n;
 	}
 }
