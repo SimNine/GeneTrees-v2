@@ -75,16 +75,21 @@ public class GeneTree implements Comparable<GeneTree> {
 				g.setColor(Color.BLACK);
 				break;
 			case Leaf:
-				g.setColor(new Color(52, 237, 52));
+				Color leafColor = new Color(52, 237, 52);
+				if (n.isActivated())
+					g.setColor(leafColor.brighter());
+				else
+					g.setColor(leafColor.darker().darker());
 				break;
 			case Root:
 				g.setColor(new Color(137, 47, 4));
 				break;
 			case Raincatcher:
-				g.setColor(Color.BLUE.brighter().brighter());
-				break;
-			case SeedDropper:
-				g.setColor(Color.YELLOW.darker().darker());
+				Color raincatcherColor = Color.BLUE.brighter().brighter();
+				if (n.isActivated())
+					g.setColor(raincatcherColor.brighter());
+				else
+					g.setColor(raincatcherColor.darker().darker());
 				break;
 			default:
 				System.out.println("node: " + n.getType());
@@ -141,7 +146,13 @@ public class GeneTree implements Comparable<GeneTree> {
 
 	// gather nutrients through root nodes, and calculate fitness decay
 	public void tick() {
+		ArrayList<TreeNode> seedDroppers = new ArrayList<TreeNode>();
 		for (TreeNode n : nodes) {
+			// if this is a leaf or a raincatcher
+			if (n.getType() == NodeType.Leaf ||
+				n.getType() == NodeType.Raincatcher)
+				seedDroppers.add(n);
+			
 			// if this is a root node, gradually increment its fitness
 			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getEnv().getGroundLevel(n.getXPos())) {
 				nutrients += 3 * n.getSize();
@@ -158,12 +169,21 @@ public class GeneTree implements Comparable<GeneTree> {
 			}
 		}
 
-		// calculate how much fitness has been gained this tick
+		// convert as much energy and nutrient as possible into fitness
 		long newFitness = Math.min(energy, nutrients);
 		if (newFitness > 0) {
 			energy -= newFitness;
 			nutrients -= newFitness;
 			fitness += 2 * newFitness;
+		}
+		
+		// try to generate a seed if this tree has enough fitness
+		if (!seedDroppers.isEmpty() && fitness > 10000*nodes.size()) {
+			System.out.println("DROPPING SEED");
+			fitness /= 2;
+			TreeNode dropperNode = seedDroppers.get((int)(Math.random()*seedDroppers.size()));
+			GeneSeed seed = new GeneSeed(dropperNode.getXPos(), dropperNode.getYPos(), this);
+			GeneTrees.panel.getEnv().getSeeds().add(seed);
 		}
 	}
 

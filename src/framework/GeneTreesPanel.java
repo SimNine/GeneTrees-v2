@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import simulation.Environment;
+import simulation.GeneSeed;
 import simulation.GeneTree;
 import simulation.RainDrop;
 import simulation.SunSpeck;
@@ -32,6 +33,7 @@ public class GeneTreesPanel extends JPanel {
 	
 	public int xMouse = 0;
 	public int yMouse = 0;
+	public boolean mousePressed = false;
 
 	private boolean ticking = true;
 	private boolean drawing = true;
@@ -91,6 +93,11 @@ public class GeneTreesPanel extends JPanel {
 					break;
 				case KeyEvent.VK_M:
 					env.multithreading = !env.multithreading;
+					break;
+				case KeyEvent.VK_S:
+					if (trackedTree != null)
+						env.getSeeds().add(new GeneSeed(xMouse + xScr, yMouse + yScr, trackedTree));
+	    			break;
 				}
 			}
 			public void keyReleased(KeyEvent e) {
@@ -113,8 +120,12 @@ public class GeneTreesPanel extends JPanel {
 			}
 			public void mouseEntered(MouseEvent arg0) {}
 			public void mouseExited(MouseEvent arg0) {}
-			public void mousePressed(MouseEvent arg0) {}
-			public void mouseReleased(MouseEvent arg0) {}
+			public void mousePressed(MouseEvent arg0) {
+				mousePressed = true;
+			}
+			public void mouseReleased(MouseEvent arg0) {
+				mousePressed = false;
+			}
 		});
 	}
 	
@@ -173,6 +184,11 @@ public class GeneTreesPanel extends JPanel {
 		// draw each raindrop
 		for (RainDrop d : env.getRain()) {
 			d.draw(g);
+		}
+		
+		// draw each seed
+		for (GeneSeed s : env.getSeeds()) {
+			s.draw(g);
 		}
 		
 		// draw the environment bounding box

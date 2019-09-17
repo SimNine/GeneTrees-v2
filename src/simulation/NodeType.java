@@ -4,8 +4,7 @@ public enum NodeType {
 	Struct,
 	Leaf,
 	Root,
-	Raincatcher,
-	SeedDropper;
+	Raincatcher;
 
 	public static int toInt(NodeType t) {
 		switch (t) {
@@ -17,8 +16,6 @@ public enum NodeType {
 			return 2;
 		case Raincatcher:
 			return 3;
-		case SeedDropper:
-			return 4;
 		}
 		
 		return -1;
@@ -34,8 +31,6 @@ public enum NodeType {
 			return Root;
 		case 3:
 			return Raincatcher;
-		case 4:
-			return SeedDropper;
 		}
 		
 		return Struct;

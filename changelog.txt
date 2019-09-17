@@ -52,3 +52,14 @@ rather than individual trees on their own.
 -Added seed count on particle graph (despite not being used yet)
 -Added a scale and a mouse tracker to UrfGraph
 -GraphDatasets are now mapped to strings instead of ints within GraphPanel
+
+0.7.0 - 9/17/19
+-Added "activation" to LeafNode and RaincatcherNode; when they catch a drop
+	of their respective type, they activate for a short time and consume less fitness
+-Removed SeedDropper nodes
+-Added seed functionality
+--Seeds are now dropped when trees have a surplus of fitness
+--When past above a threshold, a tree drops a seed from a random leaf or raincatcher
+	and its fitness halves
+-Slightly optimized particle collision checking
+-Removed set interval generation spawn

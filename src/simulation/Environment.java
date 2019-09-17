@@ -15,6 +15,9 @@ public class Environment {
 	private HashSet<GeneSeed> seeds = new HashSet<GeneSeed>();
 	private HashSet<RainDrop> rain = new HashSet<RainDrop>();
 	
+	private HashSet<GeneTree> treesToAdd = new HashSet<GeneTree>();
+	private HashSet<GeneTree> treesToRemove = new HashSet<GeneTree>();
+	
 	private BufferedImage groundImg;
 	private int groundBaseline;
 	private int groundDegree;
@@ -35,7 +38,7 @@ public class Environment {
 	private long tickCount = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
-	private int numGens = 0;
+	private int bigTicks = 0;
 	
 	public boolean multithreading = false;
 	
@@ -122,6 +125,33 @@ public class Environment {
 		return null;
 	}
 	
+	// computes the collision of add seeds with the ground and with trees
+	public void computeSeeds() {
+		// add new seeds
+		// TODO
+		
+		// check all seeds
+		HashSet<GeneSeed> remSeeds = new HashSet<GeneSeed>();
+		if (remSeeds.size() > 0) {
+			System.out.println("there are " + remSeeds.size() + " seeds");
+		}
+		for (GeneSeed s : seeds) {
+			// tick each seed
+			s.tick();
+			
+			// check if seed has hit ground
+			if (s.getYPos() > getGroundLevel(s.getXPos())) {
+				remSeeds.add(s);
+				
+				GeneTree newTree = new GeneTree(s.getTree(), s.getXPos(), (int)getGroundLevel(s.getXPos()));
+				treesToAdd.add(newTree);
+			}
+		}
+		
+		// remove all seeds that have hit the ground
+		seeds.removeAll(remSeeds);
+	}
+	
 	// computes the collision of all sunspecks with the ground and with trees
 	public void computeSun() {
 		// add new sunspecks
@@ -131,41 +161,42 @@ public class Environment {
 			sun.add(new SunSpeck((int)(pct * (double)simWidth), 0));
 		}
 		
-		// check collision of sunspecks with ground
+		// compute all sunspecks
 		HashSet<SunSpeck> remSun = new HashSet<SunSpeck>();
-		for (SunSpeck s : sun) { // for each sunspeck
-			s.tick(); // tick each sunspeck
-			if (s.getYPos() > getGroundLevel(s.getXPos())) { // check if sunspeck has hit ground
+		for (SunSpeck s : sun) {
+			// tick each sunspeck
+			s.tick();
+			
+			// check if sunspeck has hit ground
+			if (s.getYPos() > getGroundLevel(s.getXPos())) {
 				remSun.add(s);
 			}
-		}
-		sun.removeAll(remSun); // remove all specks that have hit the ground
-		
-		// check collision of sunspecks with each tree
-		for (GeneTree t : trees) {
-			for (TreeNode n : t.getAllNodes()) {
-				HashSet<SunSpeck> rem = new HashSet<SunSpeck>();
-				for (SunSpeck ss : sun) {
-					int sx = ss.getXPos();
-					int sy = ss.getYPos();
+			
+			// check collision of sunspecks with each tree
+			for (GeneTree t : trees) {
+				for (TreeNode n : t.getAllNodes()) {
+					int sx = s.getXPos();
+					int sy = s.getYPos();
 					int nx = n.getXPos();
 					int ny = n.getYPos();
 					int nd = n.getSize() / 2;
 
 					// if the sunspeck hits this node, remove it
 					if ((nx - sx) * (nx - sx) + (ny - sy) * (ny - sy) < nd * nd) {
-						rem.add(ss);
+						remSun.add(s);
 
 						// if this node is a leaf, increment its fitness
 						if (n.getType() == NodeType.Leaf) {
 							n.setActivated(true);
-							t.setEnergy(t.getEnergy() + ss.getPower());
+							t.setEnergy(t.getEnergy() + s.getPower());
 						}
 					}
 				}
-				sun.removeAll(rem);
 			}
 		}
+		
+		// remove all specks that have hit the ground
+		sun.removeAll(remSun);
 	}
 	
 	// check collision of raindrops with ground and with trees
@@ -177,27 +208,26 @@ public class Environment {
 			rain.add(new RainDrop((int)(pct * (double)simWidth), 0));
 		}
 		
-		// check collision of raindrops with ground
+		// compute all raindrops
 		HashSet<RainDrop> remRain = new HashSet<RainDrop>();
-		for (RainDrop d : rain) { // for each raindrop
-			d.tick(); // tick each raindrop
-			if (d.getYPos() > getGroundLevel(d.getXPos())) { // check if raindrop has hit ground
+		for (RainDrop d : rain) {
+			// tick each raindrop
+			d.tick();
+			
+			// check if raindrop has hit ground
+			if (d.getYPos() > getGroundLevel(d.getXPos())) {
 				remRain.add(d);
 			}
-		}
-		rain.removeAll(remRain); // remove all drops that have hit the ground
-		
-		// check collision of raindrops with each tree
-		for (GeneTree t : trees) {
-			for (TreeNode n : t.getAllNodes()) {
-				if (n.getType() != NodeType.Raincatcher) {
-					continue;
-				}
-				
-				HashSet<RainDrop> rem = new HashSet<RainDrop>();
-				for (RainDrop rd : rain) {
-					int rx = rd.getXPos();
-					int ry = rd.getYPos();
+			
+			// check for collision of raindrop with each tree
+			for (GeneTree t : trees) {
+				for (TreeNode n : t.getAllNodes()) {
+					if (n.getType() != NodeType.Raincatcher) {
+						continue;
+					}
+					
+					int rx = d.getXPos();
+					int ry = d.getYPos();
 					int nx = n.getXPos();
 					int ny = n.getYPos();
 					int nd = n.getSize() / 2;
@@ -205,13 +235,15 @@ public class Environment {
 					// if the raindrop hits this node, remove it
 					if ((nx - rx) * (nx - rx) + (ny - ry) * (ny - ry) < nd * nd) {
 						n.setActivated(true);
-						rem.add(rd);
-						t.setEnergy(t.getEnergy() + rd.getPower());
+						remRain.add(d);
+						t.setEnergy(t.getEnergy() + d.getPower());
 					}
 				}
-				rain.removeAll(rem);
 			}
 		}
+
+		// remove all raindrops that have collided with something
+		rain.removeAll(remRain);
 	}
 	
 	// computes the fitness of each tree
@@ -236,14 +268,21 @@ public class Environment {
 		}
 	}
 	
-	public void tick() {
+	public void tick() {		
 		long currTime = System.currentTimeMillis();
 		if (currTime - prevTime > 1000) {
-			if (GeneTrees.debug)
+			if (GeneTrees.debug) {
 				System.out.println("ticks per sec: " + ticksThisSec + " - multithreading: " + multithreading);
+			}
 			ticksThisSec = 0;
 			prevTime = currTime;
 		}
+		
+		Thread seedChecker = new Thread() {
+			public void run() {
+				GeneTrees.panel.getEnv().computeSeeds();
+			}
+		};
 		
 		Thread sunChecker = new Thread() {
 			public void run() {
@@ -264,10 +303,12 @@ public class Environment {
 		};
 		
 		if (multithreading) {
+			seedChecker.start();
 			sunChecker.start();
 			rainChecker.start();
 			fitnessChecker.start();
 			try {
+				seedChecker.join();
 				sunChecker.join();
 				rainChecker.join();
 				fitnessChecker.join();
@@ -275,6 +316,7 @@ public class Environment {
 				e.printStackTrace();
 			}
 		} else {
+			seedChecker.run();
 			sunChecker.run();
 			rainChecker.run();
 			fitnessChecker.run();
@@ -283,30 +325,52 @@ public class Environment {
 		// tick each tree's root nodes and wasted fitness
 		for (GeneTree t : trees) {
 			t.tick();
+			
+			// if a genetree has significantly negative fitness, kill it
+			if (t.getFitness() < t.getNumNodes()*-100000)
+				treesToRemove.add(t);
+			
+			// if a genetree has significantly positive fitness, mutate it in place
+			if (t.getFitness() > t.getNumNodes()*20000) {
+				treesToRemove.add(t);
+				treesToAdd.add(new GeneTree(t, t.getRoot().getXPos(), t.getRoot().getYPos()));
+			}
 		}
 		
-		// each 1000 ticks, try to reproduce or kill each tree
+		// add and remove all waiting trees
+		trees.addAll(treesToAdd);
+		trees.removeAll(treesToRemove);
+		
+		// if there are less than 100 trees left, repopulate
+		while (trees.size() < 100) {
+			double xPos = Math.random()*simWidth;
+			trees.add(new GeneTree((int)(xPos), (int)getGroundLevel(xPos)));
+		}
+		
+		// each 1000 ticks, update the graphs
 		tickCount++;
-		if (tickCount % 1000 == 0)
-			reproduce();
+		if (tickCount % 1000 == 0) {
+			tickCount = 0;
+			updateGraphs();
+		}
 		
 		ticksThisSec++;
 	}
 	
-	private void reproduce() {
+	private void updateGraphs() {
 		// update fitnesss graph
 		if (maxFitness > maxAlltime)
 			maxAlltime = maxFitness;
 		if (minFitness < minAlltime)
 			minAlltime = minFitness;
-		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MAX, numGens, maxFitness);
-		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG, numGens, avgFitness);
-		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MIN, numGens, minFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MAX, bigTicks, maxFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG, bigTicks, avgFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MIN, bigTicks, minFitness);
 		
 		// update population graph
 		if (trees.size() > maxTreesAlltime)
 			maxTreesAlltime = trees.size();
-		GeneTrees.populationPanel.addPoint(GeneTrees.GRAPHDATA_POPULATION, numGens, trees.size());
+		GeneTrees.populationPanel.addPoint(GeneTrees.GRAPHDATA_POPULATION, bigTicks, trees.size());
 		
 		// update tree stat graph
 		double treeNodes = 0;
@@ -314,7 +378,6 @@ public class Environment {
 		double treeRaincatchers = 0;
 		double treeStructs = 0;
 		double treeRoots = 0;
-		double treeSeeddroppers = 0;
 		for (GeneTree t : trees) {
 			for (TreeNode n : t.getAllNodes()) {
 				if (n.getType() == NodeType.Leaf)
@@ -325,58 +388,22 @@ public class Environment {
 					treeStructs++;
 				if (n.getType() == NodeType.Root)
 					treeRoots++;
-				if (n.getType() == NodeType.SeedDropper)
-					treeSeeddroppers++;
 			}
 			treeNodes += t.getNumNodes();
 		}
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ALL, numGens, treeNodes/trees.size());
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_LEAF, numGens, treeLeaves/trees.size());
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_RAINCATCHER, numGens, treeRaincatchers/trees.size());
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_STRUCTURE, numGens, treeStructs/trees.size());
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ROOT, numGens, treeRoots/trees.size());
-		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER, numGens, treeSeeddroppers/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ALL, bigTicks, treeNodes/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_LEAF, bigTicks, treeLeaves/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_RAINCATCHER, bigTicks, treeRaincatchers/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_STRUCTURE, bigTicks, treeStructs/trees.size());
+		GeneTrees.treeStatPanel.addPoint(GeneTrees.GRAPHDATA_NODES_ROOT, bigTicks, treeRoots/trees.size());
 		
 		// update weather stat graph
-		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS, numGens, sun.size());
-		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, numGens, rain.size());
-		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, numGens, seeds.size());
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS, bigTicks, sun.size());
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, bigTicks, rain.size());
+		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, bigTicks, seeds.size());
 		
-		// reset the current tick number, increment the generation number
-		tickCount = 0;
-		numGens++;
-
-		// sort the array of trees in order to remove the ones
-		//List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);
-		//Collections.sort(treesSorted);
-		
-		// check all trees for which to remove
-		HashSet<GeneTree> toRemove = new HashSet<GeneTree>();
-		for (GeneTree t : trees) {
-			if (t.getFitness() < 0) { // ( || t.getFitnessPercentage() < 0.4) {
-				toRemove.add(t);
-			}
-		}
-		trees.removeAll(toRemove);
-		
-		// check trees for which to reproduce
-		HashSet<GeneTree> toAdd = new HashSet<GeneTree>();
-		for (GeneTree t : trees) {
-			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {
-				double newXPos = t.getRoot().getXPos() + (Math.random()-0.5)*200;
-				GeneTree newTree = new GeneTree(t, (int)newXPos, (int)getGroundLevel(newXPos));
-				if (newTree.getxMin() < simWidth && newTree.getxMax() > 0)
-					toAdd.add(newTree);
-			}
-			t.resetFitness();
-		}
-		trees.addAll(toAdd);
-		
-		// if there are less than 100 trees left, repopulate
-		while (trees.size() < 100) {
-			double xPos = Math.random()*simWidth;
-			trees.add(new GeneTree((int)(xPos), (int)getGroundLevel(xPos)));
-		}
+		// increment the generation number
+		bigTicks++;
 	}
 	
 	public double getGroundLevel(double x) {
@@ -457,10 +484,10 @@ public class Environment {
 	}
 	
 	public int getNumGens() {
-		return numGens;
+		return bigTicks;
 	}
 	
 	public void setNumGens(int n) {
-		numGens = n;
+		bigTicks = n;
 	}
 }

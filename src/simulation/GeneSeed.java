@@ -20,7 +20,7 @@ public class GeneSeed {
 		int xScr = GeneTrees.panel.getXScr();
 		int yScr = GeneTrees.panel.getYScr();
 		
-		g.setColor(Color.DARK_GRAY);
+		g.setColor(Color.GREEN.darker().darker());
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
 	}
 	
