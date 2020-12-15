@@ -102,8 +102,8 @@ public class GeneTree implements Comparable<GeneTree> {
 				g.drawRect(xTL, yTL, n.getSize(), n.getSize());
 
 				// if the mouse is over this node
-				if (GeneTrees.panel.xMouse > xTL && GeneTrees.panel.xMouse < xTL + n.getSize()
-						&& GeneTrees.panel.yMouse > yTL && GeneTrees.panel.yMouse < yTL + n.getSize()) {
+				if (GeneTrees.panel.getMouseX() > xTL && GeneTrees.panel.getMouseX() < xTL + n.getSize()
+						&& GeneTrees.panel.getMouseY() > yTL && GeneTrees.panel.getMouseY() < yTL + n.getSize()) {
 					g.setColor(Color.BLACK); // highlight it
 					g.drawRect(xTL, yTL, n.getSize(), n.getSize());
 

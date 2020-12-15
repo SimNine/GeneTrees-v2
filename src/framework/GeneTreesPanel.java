@@ -7,31 +7,22 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.util.HashSet;
 
-import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import simulation.Environment;
 import simulation.GeneTree;
 import simulation.RainDrop;
 import simulation.SunSpeck;
+import urf.pannablepanel.PannablePanel;
 
 @SuppressWarnings("serial")
-public class GeneTreesPanel extends JPanel {
-	private HashSet<Integer> keys = new HashSet<Integer>();
+public class GeneTreesPanel extends PannablePanel {
 	
 	private GeneTree trackedTree = null;
 	Environment env;
 	
 	private int tickSpeed = 1;
-	
-	private int xScr = 0;
-	private int yScr = 0;
-	
-	public int xMouse = 0;
-	public int yMouse = 0;
 
 	private boolean ticking = true;
 	private boolean drawing = true;
@@ -43,10 +34,7 @@ public class GeneTreesPanel extends JPanel {
 	});
 	
 	public GeneTreesPanel(int width, int height) {
-		super();
-		setFocusable(true);
-		requestFocusInWindow();
-		this.setSize(width, height);
+		super(width, height);
 		
 		// create environment
 		double[] gFreq = { 0.002,
@@ -68,8 +56,6 @@ public class GeneTreesPanel extends JPanel {
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
-				keys.add(e.getKeyCode());
-				
 				switch (e.getKeyCode()) {
 				case KeyEvent.VK_P:
 					ticking = !ticking;
@@ -93,18 +79,8 @@ public class GeneTreesPanel extends JPanel {
 					env.multithreading = !env.multithreading;
 				}
 			}
-			public void keyReleased(KeyEvent e) {
-				keys.remove(e.getKeyCode());
-			}
+			public void keyReleased(KeyEvent e) {}
 			public void keyTyped(KeyEvent e) {}
-		});
-		
-		addMouseMotionListener(new MouseMotionListener() {
-			public void mouseDragged(MouseEvent e) {}
-			public void mouseMoved(MouseEvent e) {
-				xMouse = e.getX();
-				yMouse = e.getY();
-			}
 		});
 		
 		addMouseListener(new MouseListener() {
@@ -129,27 +105,6 @@ public class GeneTreesPanel extends JPanel {
     	}
     	if (drawing)
     		repaint();
-	}
-	
-	private void checkKeys() {
-		// check for panning keys
-		int mult = 1;
-		if (keys.contains(KeyEvent.VK_SHIFT)) {
-			mult = 8;
-			if (keys.contains(KeyEvent.VK_CONTROL)) {
-				mult = 20;
-			}
-		}
-		if (keys.contains(KeyEvent.VK_UP)) {
-			yScr -= mult;
-		} else if (keys.contains(KeyEvent.VK_DOWN)) {
-			yScr += mult;
-		}
-		if (keys.contains(KeyEvent.VK_LEFT)) {
-			xScr -= mult;
-		} else if (keys.contains(KeyEvent.VK_RIGHT)) {
-			xScr += mult;
-		}
 	}
 
 	public void paintComponent(Graphics g) {
@@ -238,14 +193,6 @@ public class GeneTreesPanel extends JPanel {
 	
 	public void startTime() {
 		time.start();
-	}
-	
-	public int getXScr() {
-		return xScr;
-	}
-	
-	public int getYScr() {
-		return yScr;
 	}
 	
 	public GeneTree getTrackedTree() {
