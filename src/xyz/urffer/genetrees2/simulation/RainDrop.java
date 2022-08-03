@@ -1,9 +1,9 @@
-package simulation;
+package xyz.urffer.genetrees2.simulation;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
-import framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.GeneTrees;
 
 public class RainDrop {
 	private int x;

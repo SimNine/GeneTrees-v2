@@ -1,35 +1,31 @@
-package simulation;
+package xyz.urffer.genetrees2.simulation;
+
 import java.awt.Color;
 import java.awt.Graphics;
 
-import framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.GeneTrees;
 
-public class SunSpeck {
+public class GeneSeed {
 	private int x;
 	private int y;
-	private long power;
+	private GeneTree t;
 	
-	public SunSpeck(int x, int y) {
+	public GeneSeed(int x, int y, GeneTree tree) {
 		this.x = x;
 		this.y = y;
-		this.power = 50000;
+		this.t = tree;
 	}
 
 	public void draw(Graphics g) {
 		int xScr = GeneTrees.panel.getXScr();
 		int yScr = GeneTrees.panel.getYScr();
 		
-		g.setColor(Color.YELLOW);
+		g.setColor(Color.DARK_GRAY);
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
-		
-		if (GeneTrees.debug) {
-			g.drawString("" + power, x - xScr, y - yScr);
-		}
 	}
 	
 	public void tick() {
 		y++;
-		power -= 80;
 	}
 	
 	public int getXPos() {
@@ -40,7 +36,7 @@ public class SunSpeck {
 		return y;
 	}
 	
-	public long getPower() {
-		return power;
+	public GeneTree getTree() {
+		return t;
 	}
 }

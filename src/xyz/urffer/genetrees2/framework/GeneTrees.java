@@ -1,19 +1,21 @@
-package framework;
+package xyz.urffer.genetrees2.framework;
+
 import java.awt.Color;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import urf.grapher.*;
+import xyz.urffer.urfutils.grapher.GraphPanel;
 
 public class GeneTrees implements Runnable {
 	public static final String ver = "0.6.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	
-	public static GraphPanel fitnessPanel, populationPanel, treeStatPanel, particleStatPanel;
+	public static GraphPanel fitnessPanel, populationPanel, nodeStatPanel, particleStatPanel;
 	public static final String GRAPHDATA_FITNESS_MAX = "max";
 	public static final String GRAPHDATA_FITNESS_AVG = "avg";
 	public static final String GRAPHDATA_FITNESS_MIN = "min";
@@ -52,43 +54,38 @@ public class GeneTrees implements Runnable {
             }
         });
 		
-		JFrame fitnessFrame = new JFrame("Fitness");
-		fitnessFrame.setVisible(true);
-		fitnessFrame.setSize(600, 600);
+		JFrame graphFrame = new JFrame("Tree Data");
+		graphFrame.setVisible(true);
+		graphFrame.setSize(600, 600);
+		
+		JTabbedPane graphTabs = new JTabbedPane();
+		graphFrame.add(graphTabs);
+		
 		fitnessPanel = new GraphPanel();
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_MAX, "Max Fitness", Color.BLUE);
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_AVG, "Average Fitness", Color.GREEN);
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_MIN, "Min Fitness", Color.RED);
-		fitnessFrame.add(fitnessPanel);
-		
-		JFrame populationFrame = new JFrame("Population");
-		populationFrame.setVisible(true);
-		populationFrame.setSize(600, 600);
+		graphTabs.addTab("Fitness", null, fitnessPanel, "Average fitness of all trees");
+
 		populationPanel = new GraphPanel();
 		populationPanel.addDataset(GeneTrees.GRAPHDATA_POPULATION, "Population", Color.BLACK);
-		populationFrame.add(populationPanel);
-		
-		JFrame treeStatFrame = new JFrame("Tree Stats");
-		treeStatFrame.setVisible(true);
-		treeStatFrame.setSize(600, 600);
-		treeStatPanel = new GraphPanel();
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_ALL, "Avg. Number of Nodes", Color.GRAY);
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_LEAF, "Avg. Number of Leaf Nodes", Color.GREEN);
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER, "Avg. Number of Raincatcher Nodes", Color.BLUE);
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE, "Avg. Number of Structure Nodes", Color.BLACK);
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_ROOT, "Avg. Number of Root Nodes", new Color(128, 128, 0));
-		treeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER, "Avg. Number of Seeddropper Nodes", Color.GREEN.darker());
-		treeStatFrame.add(treeStatPanel);
-		
-		JFrame particleStatFrame = new JFrame("Weather Stats");
-		particleStatFrame.setVisible(true);
-		particleStatFrame.setSize(600, 600);
+		graphTabs.addTab("Population", null, populationPanel, "Population of all trees");
+
+		nodeStatPanel = new GraphPanel();
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_ALL, "Avg. Number of Nodes", Color.GRAY);
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_LEAF, "Avg. Number of Leaf Nodes", Color.GREEN);
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER, "Avg. Number of Raincatcher Nodes", Color.BLUE);
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE, "Avg. Number of Structure Nodes", Color.BLACK);
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_ROOT, "Avg. Number of Root Nodes", new Color(128, 128, 0));
+		nodeStatPanel.addDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER, "Avg. Number of Seeddropper Nodes", Color.GREEN.darker());
+		graphTabs.addTab("Node Stats", null, nodeStatPanel, "Avg number of each type of node");
+
 		particleStatPanel = new GraphPanel();
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS, "Number of Sundrops", Color.YELLOW);
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, "Number of Raindrops", Color.BLUE);
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, "Number of Seeds", Color.GREEN.darker());
-		particleStatFrame.add(particleStatPanel);
-		
-		panel.startTime();
+		graphTabs.addTab("Particles", null, particleStatPanel, "Avg number of each type of particle");
+
+		panel.getSimulation().startTime();
 	}
 }

@@ -1,4 +1,4 @@
-package framework;
+package xyz.urffer.genetrees2.framework;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,12 +12,10 @@ import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
-import simulation.Environment;
-import simulation.GeneTree;
-import simulation.NodeType;
-import simulation.TreeNode;
-import urf.Pair;
-import urf.grapher.GraphDataset;
+import xyz.urffer.urfutils.Pair;
+import xyz.urffer.urfutils.grapher.*;
+
+import xyz.urffer.genetrees2.simulation.*;
 
 public class Loader {
 	
@@ -25,7 +23,7 @@ public class Loader {
 	private static final int SAVEFILE_VERSION = 1;
 	
 	public static void saveGame() {
-		GeneTrees.panel.stopTime();
+		GeneTrees.panel.getSimulation().stopTime();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
@@ -35,13 +33,13 @@ public class Loader {
 	}
 
 	public static void saveGame(String saveName) {
-		GeneTrees.panel.stopTime();
+		GeneTrees.panel.getSimulation().stopTime();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
         String filename = saveName + ".gt2";
         if (filename.equals("null.gt2")) {
-        	GeneTrees.panel.startTime();
+        	GeneTrees.panel.getSimulation().startTime();
         	return;
         }
         
@@ -67,24 +65,24 @@ public class Loader {
             savePlot(oos, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_AVG));
             savePlot(oos, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MIN));
             savePlot(oos, GeneTrees.populationPanel.getDataset(GeneTrees.GRAPHDATA_POPULATION));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
-            savePlot(oos, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
+            savePlot(oos, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
             savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS));
             savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS));
             savePlot(oos, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS));
             
             // get all the genetrees
-            HashSet<GeneTree> trees = GeneTrees.panel.getEnv().getTrees();
+            HashSet<GeneTree> trees = GeneTrees.panel.getSimulation().getEnv().getTrees();
             
             // write number of trees
             oos.writeInt(trees.size());
             
             // for each tree
-            for (GeneTree t : trees) {
+            for (xyz.urffer.genetrees2.simulation.GeneTree t : trees) {
             	// get current tree and its nodes
             	GeneTree curr = t;
             	ArrayList<TreeNode> nodes = curr.getAllNodes();
@@ -135,10 +133,10 @@ public class Loader {
             }
             
             // write all environment specific info
-            Environment env = GeneTrees.panel.env;
-            oos.writeInt(env.getNumGens());
-            oos.writeInt(env.getSimWidth());
-            oos.writeInt(env.getSimHeight());
+            Environment env = GeneTrees.panel.getSimulation().getEnv();
+            oos.writeInt(GeneTrees.panel.getSimulation().getNumGens());
+            oos.writeInt(env.getEnvWidth());
+            oos.writeInt(env.getEnvHeight());
             oos.writeInt(env.getGroundBaseline());
             oos.writeInt(env.getGroundDegree());
             for (int i = 0; i < env.getGroundDegree(); i++) {
@@ -157,7 +155,7 @@ public class Loader {
             System.exit(1);
         }
         
-        GeneTrees.panel.startTime();
+        GeneTrees.panel.getSimulation().startTime();
     }
 	
 	private static void savePlot(ObjectOutputStream oos, GraphDataset gSet) throws IOException {
@@ -177,11 +175,11 @@ public class Loader {
 	}
     
     public static void loadGame() {
-    	GeneTrees.panel.stopTime();
+    	GeneTrees.panel.getSimulation().stopTime();
     	
         String filename = JOptionPane.showInputDialog(null, "load a generation", null) + ".gt2";
         if (filename.equals("null.gt2")) {
-        	GeneTrees.panel.startTime();
+        	GeneTrees.panel.getSimulation().startTime();
         	return;
         }
         
@@ -192,19 +190,19 @@ public class Loader {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
             
             // load the savefile version
-            int savefile_version = ois.readInt();
+            //int savefile_version = ois.readInt();
             
             // load all plot points
             readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MAX));
             readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_AVG));
             readPlot(ois, GeneTrees.fitnessPanel.getDataset(GeneTrees.GRAPHDATA_FITNESS_MIN));
             readPlot(ois, GeneTrees.populationPanel.getDataset(GeneTrees.GRAPHDATA_POPULATION));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
-            readPlot(ois, GeneTrees.treeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ALL));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_LEAF));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_RAINCATCHER));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_ROOT));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_STRUCTURE));
+            readPlot(ois, GeneTrees.nodeStatPanel.getDataset(GeneTrees.GRAPHDATA_NODES_SEEDDROPPER));
             readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS));
             readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS));
             readPlot(ois, GeneTrees.particleStatPanel.getDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS));
@@ -335,13 +333,13 @@ public class Loader {
             	gAmps[i] = gAmp.get(i);
             	gDisps[i] = gDisp.get(i);
             }
-            GeneTrees.panel.env = new Environment(eWidth, eHeight, gBaseline, gFreqs, gAmps, gDisps);
+            GeneTrees.panel.getSimulation().setEnv(new Environment(eWidth, eHeight, gBaseline, gFreqs, gAmps, gDisps));
             HashSet<GeneTree> treeSet = new HashSet<GeneTree>();
             for (GeneTree t : trees) {
             	treeSet.add(t);
             }
-            GeneTrees.panel.env.setTrees(treeSet);
-            GeneTrees.panel.env.setNumGens(eGens);
+            GeneTrees.panel.getSimulation().getEnv().setTrees(treeSet);
+            GeneTrees.panel.getSimulation().setNumGens(eGens);
             
             // finish up
             ois.close();
@@ -352,6 +350,6 @@ public class Loader {
             System.exit(1);
         }
         
-        GeneTrees.panel.startTime();
+        GeneTrees.panel.getSimulation().startTime();
     }
 }

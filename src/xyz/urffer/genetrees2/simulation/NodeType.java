@@ -1,4 +1,4 @@
-package simulation;
+package xyz.urffer.genetrees2.simulation;
 
 public enum NodeType {
 	Struct,

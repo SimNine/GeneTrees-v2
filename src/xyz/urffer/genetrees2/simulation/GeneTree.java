@@ -1,11 +1,11 @@
-package simulation;
+package xyz.urffer.genetrees2.simulation;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.GeneTrees;
 
 public class GeneTree implements Comparable<GeneTree> {
 	private long fitness = 0;
@@ -132,7 +132,7 @@ public class GeneTree implements Comparable<GeneTree> {
 				g.drawRect(xMin - xScr, yMin - yScr, width, height);
 			}
 
-			if (GeneTrees.panel.getTrackedTree() == this) {
+			if (GeneTrees.panel.getSimulation().getTrackedTree() == this) {
 				g.setColor(Color.ORANGE);
 				g.drawRect(xMin - xScr, yMin - yScr, width, height);
 			}
@@ -143,7 +143,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	public void tick() {
 		for (TreeNode n : nodes) {
 			// if this is a root node, gradually increment its fitness
-			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getEnv().getGroundLevel(n.getXPos())) {
+			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getXPos())) {
 				nutrients += 3 * n.getSize();
 			}
 
