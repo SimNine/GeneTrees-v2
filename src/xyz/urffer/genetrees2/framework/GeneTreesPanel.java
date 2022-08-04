@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import xyz.urffer.genetrees2.simulation.EnvironmentParameters;
 import xyz.urffer.genetrees2.simulation.GeneTree;
 import xyz.urffer.genetrees2.simulation.Simulation;
 
@@ -17,12 +18,11 @@ import xyz.urffer.urfutils.pannablepanel.PannablePanel;
 public class GeneTreesPanel extends PannablePanel {
 	
 	private Simulation sim;
-	private static final long SIM_SEED = 3;
 	
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
 		
-		sim = new Simulation(SIM_SEED);
+		sim = new Simulation(EnvironmentParameters.ENVIRONMENT_SEED);
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
@@ -88,7 +88,7 @@ public class GeneTreesPanel extends PannablePanel {
 		GeneTree trackedTree = sim.getTrackedTree();
 		
 		g.setColor(Color.BLACK);
-		g.drawString("Tick Speed: " + sim.getTickSpeed(), 0, fh*ln++);
+		g.drawString("Tick speed: " + sim.getTicksLastSec() + "/s", 0, fh*ln++);
 		g.drawString("Tick number: " + sim.getTickCount(), 0, fh*ln++);
 		g.drawString("Generation number: " + sim.getNumGens(), 0, fh*ln++);
 		ln++;

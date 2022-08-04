@@ -13,7 +13,7 @@ public class RainDrop {
 	public RainDrop(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.power = -40000;
+		this.power = EnvironmentParameters.RAINDROP_BASE_POWER;
 	}
 
 	public void draw(Graphics g) {
@@ -30,7 +30,7 @@ public class RainDrop {
 	
 	public void tick() {
 		y++;
-		power += 100;
+		power += EnvironmentParameters.RAINDROP_TICK_POWER_DELTA;
 	}
 	
 	public int getXPos() {

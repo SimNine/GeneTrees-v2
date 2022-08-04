@@ -12,7 +12,7 @@ public class SunSpeck {
 	public SunSpeck(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.power = 50000;
+		this.power = EnvironmentParameters.SUNSPECK_BASE_POWER;
 	}
 
 	public void draw(Graphics g) {
@@ -29,7 +29,7 @@ public class SunSpeck {
 	
 	public void tick() {
 		y++;
-		power -= 80;
+		power += EnvironmentParameters.SUNSPECK_TICK_POWER_DELTA;
 	}
 	
 	public int getXPos() {

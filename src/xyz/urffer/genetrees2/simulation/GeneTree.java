@@ -3,7 +3,6 @@ package xyz.urffer.genetrees2.simulation;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
@@ -14,48 +13,67 @@ public class GeneTree implements Comparable<GeneTree> {
 	private long energy = 0;
 	private double fitnessPercentage = 0;
 
-	private TreeNode root; // this tree's base node
-	private HashSet<TreeNode> nodes; // the set of this tree's nodes
+	private TreeNode root;
 	private int age; // the number of mutations this tree is from generation 0
 
 	private int xMin = 0, xMax = 0, yMin = 0, yMax = 0, width, height;
 	
 	private Random random;
+	
 
-	// creates a new, blank genetree with a newly-assembled node structure
-	// rooted at the given node
-	// for I/O purposes
+	/**
+	 * Loads a genetree with a newly-assembled node structure rooted at the given node. Used for loading trees saved to file.
+	 * 
+	 * @param random	The random number generator
+	 * @param n			The node to use as a root
+	 */
 	public GeneTree(Random random, TreeNode n) {
 		this.random = random;
+		
 		root = n;
 		root.setOwner(this);
 		root.initLocation();
 		width = Math.abs(xMax) - Math.abs(xMin);
 		height = Math.abs(yMax) - Math.abs(yMin);
-		nodes = root.getNodes();
 	}
 
-	// creates a new genetree with one root and one other node
+	/**
+	 * Creates a completely new genetree
+	 * 
+	 * @param random	The random number generator
+	 * @param x			x-position of this new genetree
+	 * @param y			y-position of this new genetree
+	 */
 	public GeneTree(Random random, int x, int y) {
 		this(random, new TreeNode(random, x, y, null, null));
+		root.initLocation();
 
 		age = 0;
 	}
 
-	// create a new genetree as a child of the given one
-	public GeneTree(Random random, GeneTree t, int x, int y) {
-		this(random, new TreeNode(random, x, y, null, null, t.getRoot()));
+	/**
+	 * Create a new genetree as a child of the given one. The child genetree will be a mutated version of its parent.
+	 * 
+	 * @param random		The random number generator
+	 * @param parentTree	The parent tree to create a mutated child of
+	 * @param x				x-position of this new genetree
+	 * @param y				y-position of this new genetree
+	 */
+	public GeneTree(Random random, GeneTree parentTree, int x, int y) {
+		this(random, new TreeNode(random, x, y, null, null, parentTree.getRoot()));
 		root.mutate();
+		root.initLocation();
 
-		age = t.getAge() + 1;
+		age = parentTree.getAge() + 1;
 	}
+	
 	
 	public void draw(Graphics g) {
 		draw(g, GeneTrees.panel.getXScr(), GeneTrees.panel.getYScr());
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
-		for (TreeNode n : nodes) {
+		for (TreeNode n : root.getNodes()) {
 			// if this isn't the root node, draw its branch to its parent
 			if (n.getParent() != null) {
 				g.setColor(Color.BLACK);
@@ -134,20 +152,20 @@ public class GeneTree implements Comparable<GeneTree> {
 
 	// gather nutrients through root nodes, and calculate fitness decay
 	public void tick() {
-		for (TreeNode n : nodes) {
+		for (TreeNode n : root.getNodes()) {
 			// if this is a root node, gradually increment its fitness
 			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getXPos())) {
-				nutrients += 3 * n.getSize();
+				nutrients += (EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE * n.getSize());
 			}
 
 			// decrement fitness proportional to the size of this node,
 			// moreso if it is a structure node
 			if (n.getType() == NodeType.Struct) {
-				fitness -= n.getSize() * 2;
+				fitness -= n.getSize() * EnvironmentParameters.NODE_STRUCT_FITNESS_DECAY_PER_SIZE;
 			} else if (n.isActivated() || n.getType() == NodeType.Root) {
-				fitness -= n.getSize();
+				fitness -= n.getSize() * EnvironmentParameters.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE;
 			} else {
-				fitness -= n.getSize() * 4;
+				fitness -= n.getSize() * EnvironmentParameters.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE;
 			}
 		}
 
@@ -156,7 +174,7 @@ public class GeneTree implements Comparable<GeneTree> {
 		if (newFitness > 0) {
 			energy -= newFitness;
 			nutrients -= newFitness;
-			fitness += 2 * newFitness;
+			fitness += EnvironmentParameters.TREE_FITNESS_GAIN_PER_NUTRIENT_AND_POWER * newFitness;
 		}
 	}
 
@@ -176,7 +194,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	 */
 	@SuppressWarnings("unused")
 	private void printTree() {
-		for (TreeNode n : nodes) {
+		for (TreeNode n : root.getNodes()) {
 			System.out.println("x: " + n.getXPos());
 			System.out.println("y: " + n.getYPos());
 			System.out.println(" ");
@@ -198,11 +216,11 @@ public class GeneTree implements Comparable<GeneTree> {
 	}
 
 	public int getNumNodes() {
-		return nodes.size();
+		return root.getNodes().size();
 	}
 
 	public ArrayList<TreeNode> getAllNodes() {
-		return new ArrayList<TreeNode>(nodes);
+		return new ArrayList<TreeNode>(root.getNodes());
 	}
 
 	public int getAge() {

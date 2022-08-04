@@ -24,90 +24,92 @@ public class TreeNode {
 		// do nothing
 	}
 	
-	// deeply, recursively clones a TreeNode
+	/**
+	 * Deeply, recursively clones a TreeNode.
+	 * 
+	 * @param random	The random number generator
+	 * @param x			x-position of this node; -1 if not root
+	 * @param y			y-position of this node; -1 if not root
+	 * @param owner		GeneTree that owns this node
+	 * @param parent	Parent TreeNode of this TreeNode
+	 * @param tgt		TreeNode to be cloned
+	 */
 	public TreeNode(Random random, int x, int y, GeneTree owner, TreeNode parent, TreeNode tgt) {
 		this.random = random;
+		this.parent = parent;
+		this.owner = owner;
+		this.xPos = x;
+		this.yPos = y;
 		
 		this.size = tgt.getSize();
 		this.type = tgt.getType();
-		this.parent = parent;
-		this.owner = owner;
 		this.dist = tgt.getDist();
 		this.angle = tgt.getAngle();
-		this.xPos = x;
-		this.yPos = y;
 
 		for (TreeNode n : tgt.getChildren()) {
 			children.add(new TreeNode(random, -1, -1, owner, this, n));
 		}
 	}
 	
-	// creates a new TreeNode with given owner and parent node
+	/**
+	 * Creates a new TreeNode with given owner and parent node. Used either for creation of an entirely new tree,
+	 * or for addition of a new leaf to an existing tree.
+	 * 
+	 * @param random	The random number generator
+	 * @param x			x-position of this node; -1 if not root
+	 * @param y			y-position of this node; -1 if not root
+	 * @param owner		GeneTree that owns this node
+	 * @param parent	Parent TreeNode of this TreeNode
+	 */
 	public TreeNode(Random random, int x, int y, GeneTree owner, TreeNode parent) {
 		this.random = random;
-		
-		this.size = (int)(random.nextDouble()*9.0) + 20;
-		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
 		this.parent = parent;
 		this.owner = owner;
-		this.dist = random.nextDouble()*30.0 + 40;
-		this.angle = (int)(random.nextDouble()*360.0);
 		this.xPos = x;
 		this.yPos = y;
 		
-		// if this is the root node, it must be a structure node
-		if (parent == null) {
-			this.type = NodeType.Struct;
-		} else if (parent.getNumRootChildren() >= 4) {
-			// if this node's parent already has more than 4 root nodes, this cannot be a root node
-			while (this.type == NodeType.Root)
-				this.type = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
-		}
+		this.size = (int)(random.nextDouble()*9.0) + EnvironmentParameters.NODE_MINIMUM_SIZE;
+		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
+		this.dist = random.nextDouble()*30.0 + EnvironmentParameters.NODE_MINIMUM_DISTANCE;
+		this.angle = (int)(random.nextDouble()*360.0);
 		
-		// if this happens to become a structure node, there is a %40 chance of getting a child node
-		// and a decreasing chance of more
-		while (type == NodeType.Struct && random.nextDouble() < 0.40) {
-			this.addNewChild();
-		}
+		// Try to mutate this new node
+		this.mutate();
 	}
 	
-	// recursively mutates this node and its children
+	/**
+	 *  Recursively mutates this node and its children
+	 */
 	public void mutate() {
-		// 10% chance of mutating node type
-		if (random.nextDouble() < 0.10) {
+		
+		// Chance of mutating this node's type
+		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_TYPE_CHANCE) {
 			NodeType newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
 			while (newType != NodeType.Struct && random.nextDouble() < 0.40) // make it more likely that it mutates to a struct node
 				newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
 			
-			if (newType == this.type) { // if the type wouldn't change
-				// dont do shit
-			} else if (newType == NodeType.Struct) {
-				// there is a 40% chance of gaining a child if this node changes to structure
-				// and a decreasing chance of more children
-				while (random.nextDouble() < 0.40) { 
-					this.addNewChild();
-				}
-			} else { // if no longer a struct, remove its children
+			// Remove children if this is no longer a struct node
+			if (newType != NodeType.Struct) {
 				this.children.clear();
 			}
 			
 			this.type = newType;
 		}
 		
-		// 20% chance of mutating node size
-		if (random.nextDouble() < 0.20) {
+		// Chance of mutating this node's size
+		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_SIZE_CHANCE) {
 			int sizeInc = (int)(random.nextDouble()*16.0) - 16;
 			this.size += sizeInc;
 			
-			if (this.size < 10) {
-				this.size = 10;
+			if (this.size < EnvironmentParameters.NODE_MINIMUM_SIZE) {
+				this.size = EnvironmentParameters.NODE_MINIMUM_SIZE;
 			}
 		}
 		
+		// Chance to lose each child node, then recursively mutate each child
 		HashSet<TreeNode> toDelete = new HashSet<TreeNode>();
 		for (TreeNode n : children) {
-			// 5% chance to lose each child node
-			if (random.nextDouble() < .05) {
+			if (random.nextDouble() < EnvironmentParameters.NODE_LOSE_CHILD_CHANCE) {
 				toDelete.add(n);
 			}
 			
@@ -116,29 +118,32 @@ public class TreeNode {
 		}
 		children.removeAll(toDelete);
 		
-		// if this is a structure node, there is a 10% chance of adding a child node
-		// and a decreasing chance of several child nodes
-		while (this.type == NodeType.Struct && random.nextDouble() < 0.10) {
+		// Chance of adding child nodes if this is a structure node
+		while (this.type == NodeType.Struct && random.nextDouble() < EnvironmentParameters.NODE_ADD_CHILD_CHANCE) {
 			this.addNewChild();
 		}
 		
-		if (random.nextDouble() < 0.10) { // 10% chance to mutate angle
+		// Chance to mutate angle between this node and its parent
+		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_ANGLE_CHANCE) { 
 			int angleInc = (int)(random.nextDouble()*30) - 30; // by up to +/- 15 degs
 			angle += angleInc;
 		}
 		
-		if (random.nextDouble() < 0.10) { // 10% chance of changing this node's distance from parent
+		// Chance of changing this node's distance from its parent
+		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_DISTANCE_CHANCE) { 
 			double distInc = random.nextDouble()*30.0 - 30;
 			dist += distInc;
 			
-			// dist must be 10 at minimum
-			if (dist < 10) {
-				dist = 10;
+			// Check for minimum distance
+			if (dist < EnvironmentParameters.NODE_MINIMUM_DISTANCE) {
+				dist = EnvironmentParameters.NODE_MINIMUM_DISTANCE;
 			}
 		}
 	}
 	
-	// recursively computes the location within the simulation of this node, its children, grandchildren, etc
+	/**
+	 * Recursively computes the location within the simulation of this node and its descendants.
+	 */
 	public void initLocation() {
 		// if this node is the root node
 		if (this.parent == null) {
@@ -224,7 +229,11 @@ public class TreeNode {
 		}
 	}
 	
-	// recursively returns this node and all its children, grandchildren, etc
+	/**
+	 * Recursively returns this node and all its children, grandchildren, etc
+	 * 
+	 * @return	A set containing this node and all its descendents
+	 */
 	public HashSet<TreeNode> getNodes() {
 		HashSet<TreeNode> ret = new HashSet<TreeNode>();
 		

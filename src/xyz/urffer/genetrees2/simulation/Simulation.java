@@ -28,6 +28,7 @@ public class Simulation {
 	private boolean multithreading;
 	private int tickSpeed = 0;
 	private long tickCount = 0;
+	private int ticksLastSec = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
 	private int numGens = 0;
@@ -76,10 +77,14 @@ public class Simulation {
 						   random.nextDouble()*500,
 				   		   random.nextDouble()*500,
 				   		   random.nextDouble()*500 };
-		env = new Environment(random, 6000, 2000, 600, gFreq, gAmp, gDisp);
+		env = new Environment(random, 
+							  EnvironmentParameters.ENVIRONMENT_WIDTH, 
+							  EnvironmentParameters.ENVIRONMENT_HEIGHT, 
+							  EnvironmentParameters.ENVIRONMENT_GROUND_ELEVATION, 
+							  gFreq, gAmp, gDisp);
 		
 		// warm up the environment
-		warmupEnvironment(1000);
+		warmupEnvironment(EnvironmentParameters.ENVIRONMENT_NUM_WARMUP_TICKS);
 	}
 	
 	// simulate weather particle production for some arbitrary number of ticks
@@ -126,6 +131,7 @@ public class Simulation {
 		if (currTime - prevTime > 1000) {
 			if (GeneTrees.debug)
 				System.out.println("ticks per sec: " + ticksThisSec);
+			ticksLastSec = ticksThisSec;
 			ticksThisSec = 0;
 			prevTime = currTime;
 		}
@@ -166,7 +172,7 @@ public class Simulation {
 		
 		// each 1000 ticks, try to reproduce or kill each tree
 		tickCount++;
-		if (tickCount % 1000 == 0) {
+		if (tickCount % EnvironmentParameters.ENVIRONMENT_TICKS_PER_GENERATION == 0) {
 			updateGraphs();
 			advanceGeneration();
 		}
@@ -174,7 +180,7 @@ public class Simulation {
 		ticksThisSec++;
     	
     	// repaint the panel if appropriate
-    	if (drawing || tickCount >= 1000)
+    	if (drawing || tickCount >= EnvironmentParameters.ENVIRONMENT_TICKS_PER_GENERATION)
     		GeneTrees.panel.repaint();
 	}
 	
@@ -529,5 +535,9 @@ public class Simulation {
 
 	public long getAvgFitness() {
 		return avgFitness;
+	}
+	
+	public int getTicksLastSec() {
+		return ticksLastSec;
 	}
 }
