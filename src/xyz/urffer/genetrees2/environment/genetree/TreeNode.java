@@ -1,7 +1,9 @@
-package xyz.urffer.genetrees2.simulation;
+package xyz.urffer.genetrees2.environment.genetree;
 
 import java.util.HashSet;
 import java.util.Random;
+
+import xyz.urffer.genetrees2.environment.EnvironmentParameters;
 
 public class TreeNode {
 	private NodeType type;

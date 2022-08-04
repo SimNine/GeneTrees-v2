@@ -8,8 +8,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import xyz.urffer.genetrees2.simulation.EnvironmentParameters;
-import xyz.urffer.genetrees2.simulation.GeneTree;
+import xyz.urffer.genetrees2.environment.EnvironmentParameters;
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 import xyz.urffer.genetrees2.simulation.Simulation;
 
 import xyz.urffer.urfutils.pannablepanel.PannablePanel;

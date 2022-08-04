@@ -2,12 +2,8 @@ package xyz.urffer.genetrees2.simulation;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -17,9 +13,15 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.imageio.ImageIO;
 import javax.swing.Timer;
 
+import xyz.urffer.genetrees2.environment.Environment;
+import xyz.urffer.genetrees2.environment.EnvironmentParameters;
+import xyz.urffer.genetrees2.environment.RainDrop;
+import xyz.urffer.genetrees2.environment.SunSpeck;
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
+import xyz.urffer.genetrees2.environment.genetree.NodeType;
+import xyz.urffer.genetrees2.environment.genetree.TreeNode;
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
 public class Simulation {
@@ -53,9 +55,7 @@ public class Simulation {
 	private boolean drawing = true;
 	
 	// indicates whether to save an image of the environment on creating a new generation
-	private boolean saveImageOnGeneration;
-	private String runIdentifier;
-	private long generationSnapshotIncrement = 0;
+	private Snapshotter snapshotter = null;
 	
 	// tick timer
 	private Timer timer = new Timer(getTickSpeed(), new ActionListener() {
@@ -65,8 +65,9 @@ public class Simulation {
 	});
 	
 	public Simulation(long seed, boolean saveImageOnGeneration) {
-		this.saveImageOnGeneration = saveImageOnGeneration;
-		this.runIdentifier = Long.toString(System.currentTimeMillis());
+		if (saveImageOnGeneration) {
+			this.snapshotter = new Snapshotter();
+		}
 		
 		// initialize the random seed
 		random = new Random(seed);
@@ -350,22 +351,8 @@ public class Simulation {
 	}
 	
 	private void advanceGeneration() {
-		if (this.saveImageOnGeneration) {
-			BufferedImage image = new BufferedImage(env.getEnvWidth(), env.getEnvHeight(), BufferedImage.TYPE_INT_RGB);
-			Graphics2D imageGraphics = image.createGraphics();
-			this.draw(imageGraphics, 0, 0, env.getEnvWidth(), env.getEnvHeight());
-			
-			if (!new File("./" + this.runIdentifier + "/").exists()) {
-				new File("./" + this.runIdentifier + "/").mkdir();
-			}
-		    try {
-	            if (ImageIO.write(image, "png", new File("./" + this.runIdentifier + "/" + this.generationSnapshotIncrement + ".png"))) {
-	                System.out.println("environment image saved");
-	                this.generationSnapshotIncrement++;
-	            }
-		    } catch (IOException e) {
-	            e.printStackTrace();
-		    }
+		if (this.snapshotter != null) {
+			this.snapshotter.takeSnapshot(this);
 		}
 		
 		// reset the current tick number, increment the generation number
@@ -444,17 +431,17 @@ public class Simulation {
 		try {
 			// draw each tree
 			for (GeneTree t : env.getTrees()) {
-				t.draw(g);
+				t.draw(g, xDisp, yDisp);
 			}
 			
 			// draw each sunspeck
 			for (SunSpeck s : env.getSun()) {
-				s.draw(g);
+				s.draw(g, xDisp, yDisp);
 			}
 			
 			// draw each raindrop
 			for (RainDrop d : env.getRain()) {
-				d.draw(g);
+				d.draw(g, xDisp, yDisp);
 			}
 		} catch (ConcurrentModificationException e) {
 			// do nothing

@@ -1,9 +1,9 @@
-package xyz.urffer.genetrees2.simulation;
+package xyz.urffer.genetrees2.environment;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
-import xyz.urffer.genetrees2.framework.GeneTrees;
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 
 public class GeneSeed {
 	private int x;
@@ -16,10 +16,7 @@ public class GeneSeed {
 		this.t = tree;
 	}
 
-	public void draw(Graphics g) {
-		int xScr = GeneTrees.panel.getXScr();
-		int yScr = GeneTrees.panel.getYScr();
-		
+	public void draw(Graphics g, int xScr, int yScr) {
 		g.setColor(Color.DARK_GRAY);
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
 	}

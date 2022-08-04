@@ -1,26 +1,22 @@
-package xyz.urffer.genetrees2.simulation;
-
+package xyz.urffer.genetrees2.environment;
 import java.awt.Color;
 import java.awt.Graphics;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
-public class RainDrop {
+public class SunSpeck {
 	private int x;
 	private int y;
 	private long power;
 	
-	public RainDrop(int x, int y) {
+	public SunSpeck(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.power = EnvironmentParameters.RAINDROP_BASE_POWER;
+		this.power = EnvironmentParameters.SUNSPECK_BASE_POWER;
 	}
 
-	public void draw(Graphics g) {
-		int xScr = GeneTrees.panel.getXScr();
-		int yScr = GeneTrees.panel.getYScr();
-		
-		g.setColor(Color.BLUE);
+	public void draw(Graphics g, int xScr, int yScr) {
+		g.setColor(Color.YELLOW);
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
 		
 		if (GeneTrees.debug) {
@@ -30,7 +26,7 @@ public class RainDrop {
 	
 	public void tick() {
 		y++;
-		power += EnvironmentParameters.RAINDROP_TICK_POWER_DELTA;
+		power += EnvironmentParameters.SUNSPECK_TICK_POWER_DELTA;
 	}
 	
 	public int getXPos() {

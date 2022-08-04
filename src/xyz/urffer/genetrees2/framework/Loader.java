@@ -14,7 +14,10 @@ import javax.swing.JOptionPane;
 
 import xyz.urffer.urfutils.Pair;
 import xyz.urffer.urfutils.grapher.*;
-
+import xyz.urffer.genetrees2.environment.Environment;
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
+import xyz.urffer.genetrees2.environment.genetree.NodeType;
+import xyz.urffer.genetrees2.environment.genetree.TreeNode;
 import xyz.urffer.genetrees2.simulation.*;
 
 public class Loader {
@@ -82,7 +85,7 @@ public class Loader {
             oos.writeInt(trees.size());
             
             // for each tree
-            for (xyz.urffer.genetrees2.simulation.GeneTree t : trees) {
+            for (xyz.urffer.genetrees2.environment.genetree.GeneTree t : trees) {
             	// get current tree and its nodes
             	GeneTree curr = t;
             	ArrayList<TreeNode> nodes = curr.getAllNodes();

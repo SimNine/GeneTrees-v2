@@ -1,10 +1,11 @@
-package xyz.urffer.genetrees2.simulation;
+package xyz.urffer.genetrees2.environment.genetree;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Random;
 
+import xyz.urffer.genetrees2.environment.EnvironmentParameters;
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
 public class GeneTree implements Comparable<GeneTree> {
@@ -67,10 +68,6 @@ public class GeneTree implements Comparable<GeneTree> {
 		age = parentTree.getAge() + 1;
 	}
 	
-	
-	public void draw(Graphics g) {
-		draw(g, GeneTrees.panel.getXScr(), GeneTrees.panel.getYScr());
-	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
 		for (TreeNode n : root.getNodes()) {

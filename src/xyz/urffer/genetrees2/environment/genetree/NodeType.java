@@ -1,4 +1,4 @@
-package xyz.urffer.genetrees2.simulation;
+package xyz.urffer.genetrees2.environment.genetree;
 
 public enum NodeType {
 	Struct,

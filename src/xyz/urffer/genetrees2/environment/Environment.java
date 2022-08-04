@@ -1,9 +1,11 @@
-package xyz.urffer.genetrees2.simulation;
+package xyz.urffer.genetrees2.environment;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Random;
+
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 
 public class Environment {
 	private HashSet<GeneTree> trees = new HashSet<GeneTree>();
