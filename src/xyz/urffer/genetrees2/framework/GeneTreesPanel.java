@@ -22,7 +22,7 @@ public class GeneTreesPanel extends PannablePanel {
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
 		
-		sim = new Simulation(EnvironmentParameters.ENVIRONMENT_SEED);
+		sim = new Simulation(EnvironmentParameters.ENVIRONMENT_SEED, true);
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {

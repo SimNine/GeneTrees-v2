@@ -30,7 +30,7 @@ public class GeneTrees implements Runnable {
 	public static final String GRAPHDATA_PARTICLES_RAINDROPS = "raindrops";
 	public static final String GRAPHDATA_PARTICLES_SEEDS = "seeds";
 	
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new GeneTrees());
