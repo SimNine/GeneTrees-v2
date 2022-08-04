@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -17,12 +19,14 @@ import javax.swing.Timer;
 
 import xyz.urffer.genetrees2.environment.Environment;
 import xyz.urffer.genetrees2.environment.EnvironmentParameters;
+import xyz.urffer.genetrees2.environment.Particle;
 import xyz.urffer.genetrees2.environment.RainDrop;
 import xyz.urffer.genetrees2.environment.SunSpeck;
 import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 import xyz.urffer.genetrees2.environment.genetree.NodeType;
 import xyz.urffer.genetrees2.environment.genetree.TreeNode;
 import xyz.urffer.genetrees2.framework.GeneTrees;
+import xyz.urffer.urfutils.SetUtils;
 
 public class Simulation {
 
@@ -33,6 +37,7 @@ public class Simulation {
 	// variables to compute tick correctly
 	private ThreadPoolExecutor threadPool;
 	private boolean multithreading;
+	private final int numThreads = 8;
 	private int tickSpeed = 0;
 	private long tickCount = 0;
 	private int ticksLastSec = 0;
@@ -73,7 +78,7 @@ public class Simulation {
 		random = new Random(seed);
 		
 		// create a thread pool
-		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
+		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads);
 		
 		// create the environment
 		double[] gFreq = { 0.002,
@@ -141,6 +146,7 @@ public class Simulation {
 	}
 
 	public void tick() {
+		// Compute the number of ticks per second
 		long currTime = System.currentTimeMillis();
 		if (currTime - prevTime > 1000) {
 			if (GeneTrees.debug)
@@ -150,38 +156,53 @@ public class Simulation {
 			prevTime = currTime;
 		}
 
+		// Tick the simulation. Implementation differs depending on multithreading or single threading.
+		addNewSun();
+		addNewRain();
+		collideParticlesWithGround(env.getSun());
+		collideParticlesWithGround(env.getRain());
 		if (multithreading) {
+			// divide tree pool into relatively-equal chunks
+			List<Set<GeneTree>> treeSets = SetUtils.partitionSet(env.getTrees(), this.numThreads);
+			
+			// create sets of particles to remove when collision checking is done
+			Set<SunSpeck> remSun = Collections.synchronizedSet(new HashSet<SunSpeck>());
+			Set<RainDrop> remRain = Collections.synchronizedSet(new HashSet<RainDrop>());
+			
 			// create tasks
-			threadPool.execute(new Runnable() {
-				public void run() {
-					computeSun();
-				}
-			});
-			threadPool.execute(new Runnable() {
-				public void run() {
-					computeRain();
-				}
-			});
-//			threadPool.execute(new Runnable() {
-//				public void run() {
-//					computeFitness();
-//				}
-//			});
+			for (Set<GeneTree> treeSet : treeSets) {
+				threadPool.execute(new Runnable() {
+					public void run() {
+						remSun.addAll(collideSunWithTrees(treeSet));
+						remRain.addAll(collideRainWithTrees(treeSet));
+					}
+				});
+			}
 			
 			// spinlock to wait until tasks are done
 			while (threadPool.getActiveCount() > 0) {
 				// do nothing
 			}
+			
+			// remove particles that have collided
+			env.getSun().removeAll(remSun);
+			env.getRain().removeAll(remRain);
+			
+			// tick each tree's root nodes and wasted fitness
+			for (GeneTree t : env.getTrees()) {
+				t.tick();
+			}
 			computeFitness();
 		} else {
-			computeSun();
-			computeRain();
+			Set<SunSpeck> remSun = collideSunWithTrees(env.getTrees());
+			env.getSun().removeAll(remSun);
+			Set<RainDrop> remRain = collideRainWithTrees(env.getTrees());
+			env.getRain().removeAll(remRain);
+			// tick each tree's root nodes and wasted fitness
+			for (GeneTree t : env.getTrees()) {
+				t.tick();
+			}
 			computeFitness();
-		}
-		
-		// tick each tree's root nodes and wasted fitness
-		for (GeneTree t : env.getTrees()) {
-			t.tick();
 		}
 		
 		// each 1000 ticks, try to reproduce or kill each tree
@@ -198,41 +219,53 @@ public class Simulation {
     		GeneTrees.panel.repaint();
 	}
 	
-	// computes the collision of all sunspecks with the ground and with trees
-	public void computeSun() {
-		// get sets of objects
-		HashSet<GeneTree> trees = env.getTrees();
-		HashSet<SunSpeck> sun = env.getSun();
-		
-		// add new sunspecks
+	private void addNewSun() {
 		for (int i = 0; i < 2; i++) {
 			double pct = random.nextDouble();
 			pct = pct * pct;
-			sun.add(new SunSpeck((int)(pct * (double)env.getEnvWidth()), 0));
+			env.getSun().add(new SunSpeck((int)(pct * (double)env.getEnvWidth()), 0));
 		}
-		
-		// check collision of sunspecks with ground
-		HashSet<SunSpeck> remSun = new HashSet<SunSpeck>();
-		for (SunSpeck s : sun) { // for each sunspeck
-			s.tick(); // tick each sunspeck
-			if (s.getYPos() > env.getGroundLevel(s.getXPos())) { // check if sunspeck has hit ground
-				remSun.add(s);
+	}
+	
+	private void addNewRain() {
+		for (int i = 0; i < 2; i++) {
+			double pct = random.nextDouble();
+			pct = 1.0 - (pct * pct);
+			env.getRain().add(new RainDrop((int)(pct * (double)env.getEnvWidth()), 0));
+		}
+	}
+	
+	private void collideParticlesWithGround(HashSet<? extends Particle> particles) {
+		HashSet<Particle> remParticles = new HashSet<Particle>();
+		for (Particle p : particles) { // for each particle
+			p.tick(); // tick each particle
+			if (p.getYPos() > env.getGroundLevel(p.getXPos())) { // check if particle has hit ground
+				remParticles.add(p);
 			}
 		}
-		sun.removeAll(remSun); // remove all specks that have hit the ground
+		particles.removeAll(remParticles); // remove all particles that have hit the ground
+	}
+	
+	/**
+	 * Computes the collision of all sunspecks with trees. Collects and returns SunSpecks that have collided, and
+	 * increments energy of trees that have collected sun.
+	 * 
+	 * @param trees		Set of trees to check collision with
+	 * @return			Set of sunspecks that have collided with trees
+	 */
+	private Set<SunSpeck> collideSunWithTrees(Set<GeneTree> trees) {
+		HashSet<SunSpeck> sun = env.getSun();
 		
 		// check collision of sunspecks with each tree
+		HashSet<SunSpeck> remSun = new HashSet<SunSpeck>();
 		for (GeneTree t : trees) {
 			for (TreeNode n : t.getAllNodes()) {
-				for (SunSpeck ss : sun) {
-					int sx = ss.getXPos();
-					int sy = ss.getYPos();
-					int nx = n.getXPos();
-					int ny = n.getYPos();
-					int nd = n.getSize() / 2;
-
+				Iterator<SunSpeck> it = sun.iterator();
+				while (it.hasNext()) {
+					SunSpeck ss = it.next();
+					
 					// if the sunspeck hits this node, remove it
-					if ((nx - sx) * (nx - sx) + (ny - sy) * (ny - sy) < nd * nd) {
+					if (ss.collidesWithNode(n)) {
 						remSun.add(ss);
 
 						// if this node is a leaf, increment its fitness
@@ -244,48 +277,34 @@ public class Simulation {
 				}
 			}
 		}
-		sun.removeAll(remSun);
+		
+		return remSun;
 	}
-	
-	// check collision of raindrops with ground and with trees
-	public void computeRain() {
-		// get sets of objects
-		HashSet<GeneTree> trees = env.getTrees();
+
+	/**
+	 * Computes the collision of all raindrops with trees. Collects and returns raindrops that have collided, and
+	 * increments energy of trees that have collected rain.
+	 * 
+	 * @param trees		Set of trees to check collision with
+	 * @return			Set of raindrops that have collided with trees
+	 */
+	private Set<RainDrop> collideRainWithTrees(Set<GeneTree> trees) {
 		HashSet<RainDrop> rain = env.getRain();
 		
-		// add new raindrops
-		for (int i = 0; i < 2; i++) {
-			double pct = random.nextDouble();
-			pct = 1.0 - (pct * pct);
-			rain.add(new RainDrop((int)(pct * (double)env.getEnvWidth()), 0));
-		}
-		
-		// check collision of raindrops with ground
-		HashSet<RainDrop> remRain = new HashSet<RainDrop>();
-		for (RainDrop d : rain) { // for each raindrop
-			d.tick(); // tick each raindrop
-			if (d.getYPos() > env.getGroundLevel(d.getXPos())) { // check if raindrop has hit ground
-				remRain.add(d);
-			}
-		}
-		rain.removeAll(remRain); // remove all drops that have hit the ground
-		
 		// check collision of raindrops with each tree
+		HashSet<RainDrop> remRain = new HashSet<RainDrop>();
 		for (GeneTree t : trees) {
 			for (TreeNode n : t.getAllNodes()) {
 				if (n.getType() != NodeType.Raincatcher) {
 					continue;
 				}
 				
-				for (RainDrop rd : rain) {
-					int rx = rd.getXPos();
-					int ry = rd.getYPos();
-					int nx = n.getXPos();
-					int ny = n.getYPos();
-					int nd = n.getSize() / 2;
-
+				Iterator<RainDrop> it = rain.iterator();
+				while (it.hasNext()) {
+					RainDrop rd = it.next();
+					
 					// if the raindrop hits this node, remove it
-					if ((nx - rx) * (nx - rx) + (ny - ry) * (ny - ry) < nd * nd) {
+					if (rd.collidesWithNode(n)) {
 						n.setActivated(true);
 						remRain.add(rd);
 						t.setEnergy(t.getEnergy() + rd.getPower());
@@ -293,11 +312,11 @@ public class Simulation {
 				}
 			}
 		}
-		rain.removeAll(remRain);
+		
+		return remRain;
 	}
 	
 	private void updateGraphs() {
-		
 		// get set of trees (for convenience)
 		HashSet<GeneTree> trees = env.getTrees();
 		

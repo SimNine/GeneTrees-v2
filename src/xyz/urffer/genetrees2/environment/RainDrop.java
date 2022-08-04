@@ -5,15 +5,10 @@ import java.awt.Graphics;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
-public class RainDrop {
-	private int x;
-	private int y;
-	private long power;
+public class RainDrop extends Particle {
 	
 	public RainDrop(int x, int y) {
-		this.x = x;
-		this.y = y;
-		this.power = EnvironmentParameters.RAINDROP_BASE_POWER;
+		super(x, y, EnvironmentParameters.RAINDROP_BASE_POWER);
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
@@ -28,17 +23,5 @@ public class RainDrop {
 	public void tick() {
 		y++;
 		power += EnvironmentParameters.RAINDROP_TICK_POWER_DELTA;
-	}
-	
-	public int getXPos() {
-		return x;
-	}
-	
-	public int getYPos() {
-		return y;
-	}
-	
-	public long getPower() {
-		return power;
 	}
 }

@@ -1,18 +1,14 @@
 package xyz.urffer.genetrees2.environment;
+
 import java.awt.Color;
 import java.awt.Graphics;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
-public class SunSpeck {
-	private int x;
-	private int y;
-	private long power;
+public class SunSpeck extends Particle {
 	
 	public SunSpeck(int x, int y) {
-		this.x = x;
-		this.y = y;
-		this.power = EnvironmentParameters.SUNSPECK_BASE_POWER;
+		super(x, y, EnvironmentParameters.SUNSPECK_BASE_POWER);
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
@@ -27,17 +23,5 @@ public class SunSpeck {
 	public void tick() {
 		y++;
 		power += EnvironmentParameters.SUNSPECK_TICK_POWER_DELTA;
-	}
-	
-	public int getXPos() {
-		return x;
-	}
-	
-	public int getYPos() {
-		return y;
-	}
-	
-	public long getPower() {
-		return power;
 	}
 }
