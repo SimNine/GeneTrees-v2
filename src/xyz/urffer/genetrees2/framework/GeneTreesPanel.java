@@ -17,11 +17,12 @@ import xyz.urffer.urfutils.pannablepanel.PannablePanel;
 public class GeneTreesPanel extends PannablePanel {
 	
 	private Simulation sim;
+	private static final long SIM_SEED = 3;
 	
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
 		
-		sim = new Simulation();
+		sim = new Simulation(SIM_SEED);
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -20,6 +21,7 @@ public class Simulation {
 
 	// pointer to the environment
 	Environment env;
+	private Random random;
 	
 	// variables to compute tick correctly
 	private ThreadPoolExecutor threadPool;
@@ -51,7 +53,9 @@ public class Simulation {
         }
 	});
 	
-	public Simulation() {
+	public Simulation(long seed) {
+		// initialize the random seed
+		random = new Random(seed);
 		
 		// create a thread pool
 		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
@@ -62,17 +66,17 @@ public class Simulation {
 						   0.04,
 						   0.2,
 						   0.5 };
-		double[] gAmp = { Math.random()*500,
-				   		  Math.random()*200,
-				   		  Math.random()*80,
-				   		  Math.random()*5,
-				   		  Math.random()*5 };
-		double[] gDisp = { Math.random()*500,
-						   Math.random()*500,
-						   Math.random()*500,
-				   		   Math.random()*500,
-				   		   Math.random()*500 };
-		env = new Environment(6000, 2000, 600, gFreq, gAmp, gDisp);
+		double[] gAmp = { random.nextDouble()*500,
+						  random.nextDouble()*200,
+				   		  random.nextDouble()*80,
+				   		  random.nextDouble()*5,
+				   		  random.nextDouble()*5 };
+		double[] gDisp = { random.nextDouble()*500,
+						   random.nextDouble()*500,
+						   random.nextDouble()*500,
+				   		   random.nextDouble()*500,
+				   		   random.nextDouble()*500 };
+		env = new Environment(random, 6000, 2000, 600, gFreq, gAmp, gDisp);
 		
 		// warm up the environment
 		warmupEnvironment(1000);
@@ -83,7 +87,7 @@ public class Simulation {
 		for (int i = 0; i < numTicks; i++) {
 			// add new sunspecks
 			for (int j = 0; j < 1; j++) {
-				double pct = Math.random();
+				double pct = random.nextDouble();
 				pct = pct * pct;
 				env.getSun().add(new SunSpeck((int)(pct * (double)env.getEnvWidth()), 0));
 			}
@@ -100,7 +104,7 @@ public class Simulation {
 			
 			// add new raindrops
 			for (int j = 0; j < 1; j++) {
-				double pct = Math.random();
+				double pct = random.nextDouble();
 				pct = 1.0 - (pct * pct);
 				env.getRain().add(new RainDrop((int)(pct * (double)env.getEnvWidth()), 0));
 			}
@@ -182,7 +186,7 @@ public class Simulation {
 		
 		// add new sunspecks
 		for (int i = 0; i < 2; i++) {
-			double pct = Math.random();
+			double pct = random.nextDouble();
 			pct = pct * pct;
 			sun.add(new SunSpeck((int)(pct * (double)env.getEnvWidth()), 0));
 		}
@@ -200,7 +204,6 @@ public class Simulation {
 		// check collision of sunspecks with each tree
 		for (GeneTree t : trees) {
 			for (TreeNode n : t.getAllNodes()) {
-				HashSet<SunSpeck> rem = new HashSet<SunSpeck>();
 				for (SunSpeck ss : sun) {
 					int sx = ss.getXPos();
 					int sy = ss.getYPos();
@@ -210,7 +213,7 @@ public class Simulation {
 
 					// if the sunspeck hits this node, remove it
 					if ((nx - sx) * (nx - sx) + (ny - sy) * (ny - sy) < nd * nd) {
-						rem.add(ss);
+						remSun.add(ss);
 
 						// if this node is a leaf, increment its fitness
 						if (n.getType() == NodeType.Leaf) {
@@ -219,9 +222,9 @@ public class Simulation {
 						}
 					}
 				}
-				sun.removeAll(rem);
 			}
 		}
+		sun.removeAll(remSun);
 	}
 	
 	// check collision of raindrops with ground and with trees
@@ -232,7 +235,7 @@ public class Simulation {
 		
 		// add new raindrops
 		for (int i = 0; i < 2; i++) {
-			double pct = Math.random();
+			double pct = random.nextDouble();
 			pct = 1.0 - (pct * pct);
 			rain.add(new RainDrop((int)(pct * (double)env.getEnvWidth()), 0));
 		}
@@ -254,7 +257,6 @@ public class Simulation {
 					continue;
 				}
 				
-				HashSet<RainDrop> rem = new HashSet<RainDrop>();
 				for (RainDrop rd : rain) {
 					int rx = rd.getXPos();
 					int ry = rd.getYPos();
@@ -265,13 +267,13 @@ public class Simulation {
 					// if the raindrop hits this node, remove it
 					if ((nx - rx) * (nx - rx) + (ny - ry) * (ny - ry) < nd * nd) {
 						n.setActivated(true);
-						rem.add(rd);
+						remRain.add(rd);
 						t.setEnergy(t.getEnergy() + rd.getPower());
 					}
 				}
-				rain.removeAll(rem);
 			}
 		}
+		rain.removeAll(remRain);
 	}
 	
 	private void updateGraphs() {
@@ -353,8 +355,8 @@ public class Simulation {
 		HashSet<GeneTree> toAdd = new HashSet<GeneTree>();
 		for (GeneTree t : trees) {
 			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {
-				double newXPos = t.getRoot().getXPos() + (Math.random()-0.5)*200;
-				GeneTree newTree = new GeneTree(t, (int)newXPos, (int)env.getGroundLevel(newXPos));
+				double newXPos = t.getRoot().getXPos() + (random.nextDouble()-0.5)*200;
+				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos));
 				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
 					toAdd.add(newTree);
 			}
@@ -364,8 +366,8 @@ public class Simulation {
 		
 		// if there are less than 100 trees left, repopulate
 		while (trees.size() < 100) {
-			double xPos = Math.random()*env.getEnvWidth();
-			trees.add(new GeneTree((int)(xPos), (int)env.getGroundLevel(xPos)));
+			double xPos = random.nextDouble()*env.getEnvWidth();
+			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos)));
 		}
 	}
 	

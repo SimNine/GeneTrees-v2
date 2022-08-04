@@ -1,6 +1,7 @@
 package xyz.urffer.genetrees2.simulation;
 
 import java.util.HashSet;
+import java.util.Random;
 
 public class TreeNode {
 	private NodeType type;
@@ -16,13 +17,17 @@ public class TreeNode {
 	private TreeNode parent;
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
 	
+	private Random random;
+	
 	// creates a blank treenode for I/O
 	public TreeNode() {
 		// do nothing
 	}
 	
 	// deeply, recursively clones a TreeNode
-	public TreeNode(int x, int y, GeneTree owner, TreeNode parent, TreeNode tgt) {
+	public TreeNode(Random random, int x, int y, GeneTree owner, TreeNode parent, TreeNode tgt) {
+		this.random = random;
+		
 		this.size = tgt.getSize();
 		this.type = tgt.getType();
 		this.parent = parent;
@@ -33,18 +38,20 @@ public class TreeNode {
 		this.yPos = y;
 
 		for (TreeNode n : tgt.getChildren()) {
-			children.add(new TreeNode(-1, -1, owner, this, n));
+			children.add(new TreeNode(random, -1, -1, owner, this, n));
 		}
 	}
 	
 	// creates a new TreeNode with given owner and parent node
-	public TreeNode(int x, int y, GeneTree owner, TreeNode parent) {
-		this.size = (int)(Math.random()*9.0) + 20;
-		this.type = NodeType.values()[(int)(Math.random()*4.0)];
+	public TreeNode(Random random, int x, int y, GeneTree owner, TreeNode parent) {
+		this.random = random;
+		
+		this.size = (int)(random.nextDouble()*9.0) + 20;
+		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
 		this.parent = parent;
 		this.owner = owner;
-		this.dist = Math.random()*30.0 + 40;
-		this.angle = (int)(Math.random()*360.0);
+		this.dist = random.nextDouble()*30.0 + 40;
+		this.angle = (int)(random.nextDouble()*360.0);
 		this.xPos = x;
 		this.yPos = y;
 		
@@ -54,12 +61,12 @@ public class TreeNode {
 		} else if (parent.getNumRootChildren() >= 4) {
 			// if this node's parent already has more than 4 root nodes, this cannot be a root node
 			while (this.type == NodeType.Root)
-				this.type = NodeType.values()[(int)(Math.random()*NodeType.values().length)];
+				this.type = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
 		}
 		
 		// if this happens to become a structure node, there is a %40 chance of getting a child node
 		// and a decreasing chance of more
-		while (type == NodeType.Struct && Math.random() < 0.40) {
+		while (type == NodeType.Struct && random.nextDouble() < 0.40) {
 			this.addNewChild();
 		}
 	}
@@ -67,17 +74,17 @@ public class TreeNode {
 	// recursively mutates this node and its children
 	public void mutate() {
 		// 10% chance of mutating node type
-		if (Math.random() < 0.10) {
-			NodeType newType = NodeType.values()[(int)(Math.random()*NodeType.values().length)];
-			while (newType != NodeType.Struct && Math.random() < 0.40) // make it more likely that it mutates to a struct node
-				newType = NodeType.values()[(int)(Math.random()*NodeType.values().length)];
+		if (random.nextDouble() < 0.10) {
+			NodeType newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
+			while (newType != NodeType.Struct && random.nextDouble() < 0.40) // make it more likely that it mutates to a struct node
+				newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
 			
 			if (newType == this.type) { // if the type wouldn't change
 				// dont do shit
 			} else if (newType == NodeType.Struct) {
 				// there is a 40% chance of gaining a child if this node changes to structure
 				// and a decreasing chance of more children
-				while (Math.random() < 0.40) { 
+				while (random.nextDouble() < 0.40) { 
 					this.addNewChild();
 				}
 			} else { // if no longer a struct, remove its children
@@ -88,8 +95,8 @@ public class TreeNode {
 		}
 		
 		// 20% chance of mutating node size
-		if (Math.random() < 0.20) {
-			int sizeInc = (int)(Math.random()*16.0) - 16;
+		if (random.nextDouble() < 0.20) {
+			int sizeInc = (int)(random.nextDouble()*16.0) - 16;
 			this.size += sizeInc;
 			
 			if (this.size < 10) {
@@ -100,7 +107,7 @@ public class TreeNode {
 		HashSet<TreeNode> toDelete = new HashSet<TreeNode>();
 		for (TreeNode n : children) {
 			// 5% chance to lose each child node
-			if (Math.random() < .05) {
+			if (random.nextDouble() < .05) {
 				toDelete.add(n);
 			}
 			
@@ -111,17 +118,17 @@ public class TreeNode {
 		
 		// if this is a structure node, there is a 10% chance of adding a child node
 		// and a decreasing chance of several child nodes
-		while (this.type == NodeType.Struct && Math.random() < 0.10) {
+		while (this.type == NodeType.Struct && random.nextDouble() < 0.10) {
 			this.addNewChild();
 		}
 		
-		if (Math.random() < 0.10) { // 10% chance to mutate angle
-			int angleInc = (int)(Math.random()*30) - 30; // by up to +/- 15 degs
+		if (random.nextDouble() < 0.10) { // 10% chance to mutate angle
+			int angleInc = (int)(random.nextDouble()*30) - 30; // by up to +/- 15 degs
 			angle += angleInc;
 		}
 		
-		if (Math.random() < 0.10) { // 10% chance of changing this node's distance from parent
-			double distInc = Math.random()*30.0 - 30;
+		if (random.nextDouble() < 0.10) { // 10% chance of changing this node's distance from parent
+			double distInc = random.nextDouble()*30.0 - 30;
 			dist += distInc;
 			
 			// dist must be 10 at minimum
@@ -269,7 +276,7 @@ public class TreeNode {
 	}
 	
 	public void addNewChild() {
-		children.add(new TreeNode(-1, -1, owner, this));
+		children.add(new TreeNode(random, -1, -1, owner, this));
 	}
 	
 	public void addChild(TreeNode node) {

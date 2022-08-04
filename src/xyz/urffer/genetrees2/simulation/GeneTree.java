@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
 
@@ -18,43 +19,35 @@ public class GeneTree implements Comparable<GeneTree> {
 	private int age; // the number of mutations this tree is from generation 0
 
 	private int xMin = 0, xMax = 0, yMin = 0, yMax = 0, width, height;
-
-	// creates a new genetree with one root and one other node
-	public GeneTree(int x, int y) {
-		root = new TreeNode(x, y, this, null);
-		this.init();
-
-		nodes = root.getNodes();
-
-		age = 0;
-	}
+	
+	private Random random;
 
 	// creates a new, blank genetree with a newly-assembled node structure
 	// rooted at the given node
 	// for I/O purposes
-	public GeneTree(TreeNode n) {
+	public GeneTree(Random random, TreeNode n) {
+		this.random = random;
 		root = n;
-		this.init();
-
-		nodes = root.getNodes();
-	}
-
-	// create a new genetree as a child of the given one
-	public GeneTree(GeneTree t, int x, int y) {
-		root = new TreeNode(x, y, this, null, t.getRoot());
-		root.mutate();
-		this.init();
-
-		nodes = root.getNodes();
-
-		age = t.getAge() + 1;
-	}
-
-	private void init() {
 		root.setOwner(this);
 		root.initLocation();
 		width = Math.abs(xMax) - Math.abs(xMin);
 		height = Math.abs(yMax) - Math.abs(yMin);
+		nodes = root.getNodes();
+	}
+
+	// creates a new genetree with one root and one other node
+	public GeneTree(Random random, int x, int y) {
+		this(random, new TreeNode(random, x, y, null, null));
+
+		age = 0;
+	}
+
+	// create a new genetree as a child of the given one
+	public GeneTree(Random random, GeneTree t, int x, int y) {
+		this(random, new TreeNode(random, x, y, null, null, t.getRoot()));
+		root.mutate();
+
+		age = t.getAge() + 1;
 	}
 	
 	public void draw(Graphics g) {

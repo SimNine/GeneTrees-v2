@@ -3,6 +3,7 @@ package xyz.urffer.genetrees2.simulation;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
+import java.util.Random;
 
 public class Environment {
 	private HashSet<GeneTree> trees = new HashSet<GeneTree>();
@@ -20,8 +21,14 @@ public class Environment {
 	private int envWidth;
 	private int envHeight;
 	
+	private Random random;
+	
 	// build an environment
-	public Environment(int sWidth, int sHeight, int gBaseline, double[] gFreq, double[] gAmp, double[] gDisp) {
+	public Environment(Random random, int sWidth, int sHeight, 
+					   int gBaseline, double[] gFreq, double[] gAmp,
+					   double[] gDisp) {
+		this.random = random;
+		
 		groundBaseline = gBaseline;
 		groundFreq = gFreq;
 		groundAmp = gAmp;
@@ -46,8 +53,8 @@ public class Environment {
 		
 		// populate the list of trees
 		for (int i = 0; i < 100; i++) {
-			double xPos = Math.random()*envWidth;
-			trees.add(new GeneTree((int)(xPos), (int)getGroundLevel(xPos)));
+			double xPos = random.nextDouble()*envWidth;
+			trees.add(new GeneTree(random, (int)(xPos), (int)getGroundLevel(xPos)));
 		}
 	}
 	
