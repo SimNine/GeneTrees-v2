@@ -2,8 +2,6 @@ package xyz.urffer.genetrees2.simulation;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -14,8 +12,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.swing.Timer;
 
 import xyz.urffer.genetrees2.environment.Environment;
 import xyz.urffer.genetrees2.environment.EnvironmentParameters;
@@ -36,14 +32,23 @@ public class Simulation {
 	
 	// variables to compute tick correctly
 	private ThreadPoolExecutor threadPool;
-	private boolean multithreading;
+	private boolean multithreading = true;
+	private boolean running = true;
 	private final int numThreads = 8;
-	private int tickSpeed = 0;
 	private long tickCount = 0;
 	private int ticksLastSec = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
 	private int numGens = 0;
+	private Thread tickThread = new Thread(new Runnable() {
+		public void run() {
+			while (true) {
+				if (running) {
+					tick();
+				}
+			}
+		}
+	});
 	
 	// variables to adjust graphs
 	private long minAlltime = Long.MAX_VALUE;
@@ -61,13 +66,6 @@ public class Simulation {
 	
 	// indicates whether to save an image of the environment on creating a new generation
 	private Snapshotter snapshotter = null;
-	
-	// tick timer
-	private Timer timer = new Timer(getTickSpeed(), new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-        	tick();
-        }
-	});
 	
 	public Simulation(long seed, boolean saveImageOnGeneration) {
 		if (saveImageOnGeneration) {
@@ -104,6 +102,9 @@ public class Simulation {
 		
 		// warm up the environment
 		warmupEnvironment(EnvironmentParameters.ENVIRONMENT_NUM_WARMUP_TICKS);
+		
+		// start the tick thread
+		tickThread.start();
 	}
 	
 	// simulate weather particle production for some arbitrary number of ticks
@@ -487,67 +488,28 @@ public class Simulation {
 		env = e;
 	}
 	
-	public void toggleMultithreading() {
-		multithreading = !multithreading;
+	public boolean isRunning() {
+		return this.running;
+	}
+	
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
+	
+	public boolean isMultithreading() {
+		return this.multithreading;
 	}
 	
 	public void setMultithreading(boolean multithreading) {
 		this.multithreading = multithreading;
 	}
 	
-	public void toggleDrawing() {
-		drawing = !drawing;
+	public boolean isDrawing() {
+		return this.drawing;
 	}
 	
 	public void setDrawing(boolean drawing) {
 		this.drawing = drawing;
-	}
-	
-	public void stopTime() {
-		timer.stop();
-	}
-	
-	public void startTime() {
-		timer.start();
-	}
-	
-	public void toggleTimer() {
-		if (timer.isRunning()) {
-			timer.stop();
-		} else {
-			timer.start();
-		}
-	}
-
-	public int getTickSpeed() {
-		return tickSpeed;
-	}
-
-	public void setTickSpeed(int tickSpeed) {
-		this.tickSpeed = tickSpeed;
-		this.timer.setDelay(tickSpeed);
-	}
-	
-	private boolean isUnbound = false;
-	private Thread unboundTickThread;
-	public void toggleUnboundTickSpeed() {
-		if (isUnbound) {
-			this.setDrawing(true);
-			this.startTime();
-			isUnbound = false;
-		} else {
-			this.setDrawing(false);
-			this.stopTime();
-			isUnbound = true;
-			unboundTickThread = new Thread(new Runnable() {
-				public void run() {
-					while (isUnbound) {
-						tick();
-					}
-				}
-			});
-			unboundTickThread.start();
-		}
 	}
 	
 	public long getTickCount() {

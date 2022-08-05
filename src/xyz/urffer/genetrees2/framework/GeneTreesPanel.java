@@ -28,7 +28,7 @@ public class GeneTreesPanel extends PannablePanel {
 			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
 				case KeyEvent.VK_P:
-					sim.toggleTimer();
+					sim.setRunning(!sim.isRunning());
 					break;
 				case KeyEvent.VK_D:
 					GeneTrees.debug = !GeneTrees.debug;
@@ -39,17 +39,11 @@ public class GeneTreesPanel extends PannablePanel {
 				case KeyEvent.VK_F2:
 					Loader.loadGame();
 					break;
-				case KeyEvent.VK_R:
-					//continuousGenAndSave();
-					break;
 				case KeyEvent.VK_Q:
-					sim.toggleDrawing();
+					sim.setDrawing(!sim.isDrawing());
 					break;
 				case KeyEvent.VK_M:
-					sim.toggleMultithreading();
-					break;
-				case KeyEvent.VK_O:
-					sim.toggleUnboundTickSpeed();
+					sim.setMultithreading(!sim.isMultithreading());
 					break;
 				}
 			}

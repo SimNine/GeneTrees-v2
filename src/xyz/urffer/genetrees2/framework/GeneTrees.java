@@ -85,7 +85,5 @@ public class GeneTrees implements Runnable {
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, "Number of Raindrops", Color.BLUE);
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, "Number of Seeds", Color.GREEN.darker());
 		graphTabs.addTab("Particles", null, particleStatPanel, "Avg number of each type of particle");
-
-		panel.getSimulation().startTime();
 	}
 }
