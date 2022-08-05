@@ -74,8 +74,8 @@ public class GeneTree implements Comparable<GeneTree> {
 			// if this isn't the root node, draw its branch to its parent
 			if (n.getParent() != null) {
 				g.setColor(Color.BLACK);
-				g.drawLine(n.getXPos() - xScr, n.getYPos() - yScr, n.getParent().getXPos() - xScr,
-						n.getParent().getYPos() - yScr);
+				g.drawLine(n.getXPos() - xScr, n.getYPos() - yScr, 
+						   n.getParent().getXPos() - xScr, n.getParent().getYPos() - yScr);
 			}
 
 			switch (n.getType()) {
@@ -110,34 +110,27 @@ public class GeneTree implements Comparable<GeneTree> {
 				g.drawRect(xTL, yTL, n.getSize(), n.getSize());
 
 				// if the mouse is over this node
-				if (GeneTrees.panel.getMouseX() > xTL && GeneTrees.panel.getMouseX() < xTL + n.getSize()
-						&& GeneTrees.panel.getMouseY() > yTL && GeneTrees.panel.getMouseY() < yTL + n.getSize()) {
+				if (GeneTrees.panel.getMouseX() > xTL && GeneTrees.panel.getMouseX() < xTL + n.getSize() && 
+					GeneTrees.panel.getMouseY() > yTL && GeneTrees.panel.getMouseY() < yTL + n.getSize()) {
 					g.setColor(Color.BLACK); // highlight it
 					g.drawRect(xTL, yTL, n.getSize(), n.getSize());
 
 					// highlight its parent
 					if (n.getParent() != null) {
-						int s = n.getParent().getSize() + 2;
-						xTL = n.getParent().getXPos() - s / 2;
-						yTL = n.getParent().getYPos() - s / 2;
+						int xTLparent = n.getParent().getXPos() - n.getParent().getSize() / 2 - xScr;
+						int yTLparent = n.getParent().getYPos() - n.getParent().getSize() / 2 - yScr;
 						g.setColor(Color.CYAN);
-						g.drawRect(xTL, yTL, s, s);
+						g.drawRect(xTLparent, yTLparent, n.getParent().getSize(), n.getParent().getSize());
 					}
 
 					// hightlight its children
 					for (TreeNode nc : n.getChildren()) {
-						int s = nc.getSize() + 2;
-						xTL = nc.getXPos() - s / 2;
-						yTL = nc.getYPos() - s / 2;
+						int xTLchild = nc.getXPos() - nc.getSize() / 2 - xScr;
+						int yTLchild  = nc.getYPos() - nc.getSize() / 2 - yScr;
 						g.setColor(Color.MAGENTA);
-						g.drawRect(xTL, yTL, s, s);
+						g.drawRect(xTLchild, yTLchild, nc.getSize(), nc.getSize());
 					}
 				}
-			}
-
-			if (GeneTrees.debug) {
-				g.setColor(Color.BLUE);
-				g.drawRect(xMin - xScr, yMin - yScr, width, height);
 			}
 
 			if (GeneTrees.panel.getSimulation().getTrackedTree() == this) {
