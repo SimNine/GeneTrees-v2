@@ -33,7 +33,6 @@ public class Simulation {
 	private ThreadPoolExecutor threadPool;
 	private boolean multithreading = true;
 	private boolean running = true;
-	private final int numThreads = 15;
 	private long tickCount = 0;
 	private int ticksLastSec = 0;
 	private int ticksThisSec = 0;
@@ -83,7 +82,7 @@ public class Simulation {
 		random = new Random(seed);
 		
 		// create a thread pool
-		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads);
+		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(SimulationParameters.NUM_THREADS);
 		
 		// create the environment
 		double[] gFreq = { 0.002,
@@ -173,8 +172,8 @@ public class Simulation {
 		collideParticlesWithGround(env.getRain());
 		if (multithreading) {
 			// divide particle pools into equal-sized chunks
-			List<Set<SunSpeck>> sunSets = SetUtils.partitionSet(env.getSun(), this.numThreads);
-			List<Set<RainDrop>> rainSets = SetUtils.partitionSet(env.getRain(), this.numThreads);
+			List<Set<SunSpeck>> sunSets = SetUtils.partitionSet(env.getSun(), SimulationParameters.NUM_THREADS);
+			List<Set<RainDrop>> rainSets = SetUtils.partitionSet(env.getRain(), SimulationParameters.NUM_THREADS);
 			
 			
 			// create tasks

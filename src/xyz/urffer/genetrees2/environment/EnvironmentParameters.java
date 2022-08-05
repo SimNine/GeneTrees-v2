@@ -5,8 +5,6 @@ public class EnvironmentParameters {
 	
 	
 	// environment
-	
-	public static final long ENVIRONMENT_SEED = 3;
 
 	public static final int ENVIRONMENT_WIDTH = 6000;
 	public static final int ENVIRONMENT_HEIGHT = 1200;
