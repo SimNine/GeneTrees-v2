@@ -37,6 +37,7 @@ public class Simulation {
 	private int ticksLastSec = 0;
 	private int ticksThisSec = 0;
 	private long prevTime = System.currentTimeMillis();
+	private long lastGenCompletedAtTime = System.currentTimeMillis();
 	private int numGens = 0;
 	private Thread tickThread = new Thread(new Runnable() {
 		public void run() {
@@ -277,11 +278,19 @@ public class Simulation {
 			}
 			
 			for (GeneTree t : trees) {
+				if (ss.isConsumed()) {
+					break;
+				}
+				
 				if (!ss.collidesWithTree(t)) {
 					continue;
 				}
 				
 				for (TreeNode n : t.getAllNodes()) {
+					if (ss.isConsumed()) {
+						break;
+					}
+					
 					// if the sunspeck hits this node, remove it
 					if (ss.collidesWithNode(n)) {
 						remSun.add(ss);
@@ -321,11 +330,19 @@ public class Simulation {
 			}
 			
 			for (GeneTree t : trees) {
+				if (rd.isConsumed()) {
+					break;
+				}
+				
 				if (!rd.collidesWithTree(t)) {
 					continue;
 				}
 				
 				for (TreeNode n : t.getAllNodes()) {
+					if (rd.isConsumed()) {
+						break;
+					}
+					
 					if (n.getType() != NodeType.Raincatcher) {
 						continue;
 					}
@@ -403,6 +420,10 @@ public class Simulation {
 		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SUNDROPS, numGens, env.getSun().size());
 		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, numGens, env.getRain().size());
 		GeneTrees.particleStatPanel.addPoint(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, numGens, env.getSeeds().size());
+		
+		// update performance graph
+		long timeForLastGeneration = System.currentTimeMillis() - this.lastGenCompletedAtTime;
+		GeneTrees.performancePanel.addPoint(GeneTrees.GRAPHDATA_PERFORMANCE_MILLISECONDS_PER_GENERATION, numGens, timeForLastGeneration);
 	}
 	
 	private void advanceGeneration() {
@@ -413,6 +434,7 @@ public class Simulation {
 		// reset the current tick number, increment the generation number
 		tickCount = 0;
 		numGens++;
+		this.lastGenCompletedAtTime = System.currentTimeMillis();
 
 		// sort the array of trees in order to remove the ones
 		//List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);

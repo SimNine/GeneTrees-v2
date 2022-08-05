@@ -2,13 +2,11 @@ package xyz.urffer.genetrees2.environment;
 
 public class EnvironmentParameters {
 
-	
-	
 	// environment
 
-	public static final int ENVIRONMENT_WIDTH = 6000;
-	public static final int ENVIRONMENT_HEIGHT = 1200;
-	public static final int ENVIRONMENT_GROUND_ELEVATION = 600;
+	public static final int ENVIRONMENT_WIDTH = 3000;
+	public static final int ENVIRONMENT_HEIGHT = 2000;
+	public static final int ENVIRONMENT_GROUND_ELEVATION = 1200;
 
 	public static final int ENVIRONMENT_NUM_WARMUP_TICKS = 1000;
 	public static final int ENVIRONMENT_TICKS_PER_GENERATION = 1000;
@@ -19,11 +17,11 @@ public class EnvironmentParameters {
 	
 	// particles
 	
-	public static final long RAINDROP_BASE_POWER = -20000;
-	public static final long RAINDROP_TICK_POWER_DELTA = 50;
+	public static final long RAINDROP_BASE_POWER = -50000;
+	public static final long RAINDROP_TICK_POWER_DELTA = 55;
 	
-	public static final long SUNSPECK_BASE_POWER = 40000;
-	public static final long SUNSPECK_TICK_POWER_DELTA = -50;
+	public static final long SUNSPECK_BASE_POWER = 70000;
+	public static final long SUNSPECK_TICK_POWER_DELTA = -45;
 	
 	
 	
@@ -50,9 +48,9 @@ public class EnvironmentParameters {
 	public static final double NODE_MINIMUM_DISTANCE = 40.0;
 
 	public static final double NODE_MUTATE_TYPE_CHANCE = 0.15;
-	public static final double NODE_MUTATE_SIZE_CHANCE = 0.20;
-	public static final double NODE_MUTATE_ANGLE_CHANCE = 0.15;
-	public static final double NODE_MUTATE_DISTANCE_CHANCE = 0.10;
+	public static final double NODE_MUTATE_SIZE_CHANCE = 0.30;
+	public static final double NODE_MUTATE_ANGLE_CHANCE = 0.25;
+	public static final double NODE_MUTATE_DISTANCE_CHANCE = 0.15;
 	
 	public static final double NODE_ADD_CHILD_CHANCE = 0.30;
 	public static final double NODE_LOSE_CHILD_CHANCE = 0.10;

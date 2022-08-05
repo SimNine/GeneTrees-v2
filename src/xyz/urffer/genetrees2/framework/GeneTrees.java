@@ -15,22 +15,28 @@ public class GeneTrees implements Runnable {
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	
-	public static GraphPanel fitnessPanel, populationPanel, nodeStatPanel, particleStatPanel;
+	public static GraphPanel fitnessPanel, populationPanel, nodeStatPanel, particleStatPanel, performancePanel;
+	
 	public static final String GRAPHDATA_FITNESS_MAX = "max";
 	public static final String GRAPHDATA_FITNESS_AVG = "avg";
 	public static final String GRAPHDATA_FITNESS_MIN = "min";
 	public static final String GRAPHDATA_FITNESS_AVG_ENERGY = "avg_energy";
 	public static final String GRAPHDATA_FITNESS_AVG_NUTRIENTS = "avg_nutrients";
+	
 	public static final String GRAPHDATA_POPULATION = "population";
+	
 	public static final String GRAPHDATA_NODES_ALL = "all";
 	public static final String GRAPHDATA_NODES_LEAF = "leaf";
 	public static final String GRAPHDATA_NODES_RAINCATCHER = "raincatcher";
 	public static final String GRAPHDATA_NODES_ROOT = "root";
 	public static final String GRAPHDATA_NODES_STRUCTURE = "structure";
 	public static final String GRAPHDATA_NODES_SEEDDROPPER = "seeddropper";
+	
 	public static final String GRAPHDATA_PARTICLES_SUNDROPS = "sundrops";
 	public static final String GRAPHDATA_PARTICLES_RAINDROPS = "raindrops";
 	public static final String GRAPHDATA_PARTICLES_SEEDS = "seeds";
+
+	public static final String GRAPHDATA_PERFORMANCE_MILLISECONDS_PER_GENERATION = "mpg";
 	
 	public static boolean debug = false;
 
@@ -89,5 +95,9 @@ public class GeneTrees implements Runnable {
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_RAINDROPS, "Number of Raindrops", Color.BLUE);
 		particleStatPanel.addDataset(GeneTrees.GRAPHDATA_PARTICLES_SEEDS, "Number of Seeds", Color.GREEN.darker());
 		graphTabs.addTab("Particles", null, particleStatPanel, "Avg number of each type of particle");
+		
+		performancePanel = new GraphPanel();
+		performancePanel.addDataset(GeneTrees.GRAPHDATA_PERFORMANCE_MILLISECONDS_PER_GENERATION, "Milliseconds per generation", Color.BLACK);
+		graphTabs.addTab("Performance", null, performancePanel, "Simulation performance statistics");
 	}
 }
