@@ -58,6 +58,9 @@ public class GeneTreesPanel extends PannablePanel {
 				case KeyEvent.VK_M:
 					sim.setMultithreading(!sim.isMultithreading());
 					break;
+				case KeyEvent.VK_T:
+					sim.tick();
+					break;
 				}
 			}
 			public void keyReleased(KeyEvent e) {}
@@ -123,6 +126,7 @@ public class GeneTreesPanel extends PannablePanel {
 		g.drawString("Pause drawing (but continue simulation): Q", 0, fh*ln++);
 		g.drawString("Toggle debug features: D", 0, fh*ln++);
 		g.drawString("Toggle multithreading: M", 0, fh*ln++);
+		g.drawString("Single manual tick: T", 0, fh*ln++);
 		ln++;
 		g.drawString("Is running: " + sim.isRunning(), 0, fh*ln++);
 		g.drawString("Is drawing: " + isDrawing, 0, fh*ln++);
