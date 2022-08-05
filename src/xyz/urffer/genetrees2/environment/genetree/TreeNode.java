@@ -18,6 +18,9 @@ public class TreeNode {
 	private TreeNode parent;
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
 	
+	// cached set of all descendants of this node
+	private HashSet<TreeNode> descendants = null;
+	
 	private Random random;
 	
 	// creates a blank treenode for I/O
@@ -233,14 +236,19 @@ public class TreeNode {
 	 * 
 	 * @return	A set containing this node and all its descendents
 	 */
-	public HashSet<TreeNode> getNodes() {
+	public HashSet<TreeNode> getDescendants() {
+		if (this.descendants != null) {
+			return this.descendants;
+		}
+		
 		HashSet<TreeNode> ret = new HashSet<TreeNode>();
 		
 		ret.add(this);
 		for (TreeNode t : children) {
-			ret.addAll(t.getNodes());
+			ret.addAll(t.getDescendants());
 		}
 		
+		this.descendants = ret;
 		return ret;
 	}
 	

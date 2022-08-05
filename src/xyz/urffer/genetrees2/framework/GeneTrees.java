@@ -19,6 +19,8 @@ public class GeneTrees implements Runnable {
 	public static final String GRAPHDATA_FITNESS_MAX = "max";
 	public static final String GRAPHDATA_FITNESS_AVG = "avg";
 	public static final String GRAPHDATA_FITNESS_MIN = "min";
+	public static final String GRAPHDATA_FITNESS_AVG_ENERGY = "avg_energy";
+	public static final String GRAPHDATA_FITNESS_AVG_NUTRIENTS = "avg_nutrients";
 	public static final String GRAPHDATA_POPULATION = "population";
 	public static final String GRAPHDATA_NODES_ALL = "all";
 	public static final String GRAPHDATA_NODES_LEAF = "leaf";
@@ -65,6 +67,8 @@ public class GeneTrees implements Runnable {
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_MAX, "Max Fitness", Color.BLUE);
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_AVG, "Average Fitness", Color.GREEN);
 		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_MIN, "Min Fitness", Color.RED);
+		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_AVG_NUTRIENTS, "Average Nutrients", new Color(128, 128, 0));
+		fitnessPanel.addDataset(GeneTrees.GRAPHDATA_FITNESS_AVG_ENERGY, "Average Energy", Color.ORANGE);
 		graphTabs.addTab("Fitness", null, fitnessPanel, "Average fitness of all trees");
 
 		populationPanel = new GraphPanel();

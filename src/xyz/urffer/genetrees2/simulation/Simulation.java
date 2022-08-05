@@ -33,7 +33,7 @@ public class Simulation {
 	private ThreadPoolExecutor threadPool;
 	private boolean multithreading = true;
 	private boolean running = true;
-	private final int numThreads = 8;
+	private final int numThreads = 15;
 	private long tickCount = 0;
 	private int ticksLastSec = 0;
 	private int ticksThisSec = 0;
@@ -65,6 +65,8 @@ public class Simulation {
 	private long minFitness = 0;
 	private long maxFitness = 0;
 	private long avgFitness = 0;
+	private long avgNutrients = 0;
+	private long avgEnergy = 0;
 	
 	// pointer to the currently tracked tree
 	private GeneTree trackedTree = null;
@@ -165,6 +167,8 @@ public class Simulation {
 		// Tick the simulation. Implementation differs depending on multithreading or single threading.
 		addNewSun();
 		addNewRain();
+		tickParticles(env.getSun());
+		tickParticles(env.getRain());
 		collideParticlesWithGround(env.getSun());
 		collideParticlesWithGround(env.getRain());
 		if (multithreading) {
@@ -232,10 +236,25 @@ public class Simulation {
 		}
 	}
 	
+	private void tickParticles(HashSet<? extends Particle> particles) {
+		for (Particle p : particles) {
+			p.tick();
+		}
+	}
+	
+	private void removeZeroEnergyParticles(HashSet<? extends Particle> particles) {
+		HashSet<Particle> remParticles = new HashSet<Particle>();
+		for (Particle p : particles) {
+			if (p.getPower() <= 0) {
+				remParticles.add(p);
+			}
+		}
+		particles.removeAll(remParticles);
+	}
+	
 	private void collideParticlesWithGround(HashSet<? extends Particle> particles) {
 		HashSet<Particle> remParticles = new HashSet<Particle>();
 		for (Particle p : particles) { // for each particle
-			p.tick(); // tick each particle
 			if (p.getYPos() > env.getGroundLevel(p.getXPos())) { // check if particle has hit ground
 				remParticles.add(p);
 			}
@@ -268,6 +287,11 @@ public class Simulation {
 					if (ss.collidesWithNode(n)) {
 						remSun.add(ss);
 						ss.consume();
+						
+						// if this sunspeck is out of power, don't do anything more
+						if (ss.getPower() <= 0) {
+							continue;
+						}
 
 						// if this node is a leaf, increment its fitness
 						if (n.getType() == NodeType.Leaf) {
@@ -309,9 +333,15 @@ public class Simulation {
 						
 					// if the raindrop hits this node, remove it
 					if (rd.collidesWithNode(n)) {
-						rd.consume();
-						n.setActivated(true);
 						remRain.add(rd);
+						rd.consume();
+						
+						// if this raindrop is out of power, do nothing more
+						if (rd.getPower() <= 0) {
+							continue;
+						}
+						
+						n.setActivated(true);
 						t.setEnergy(t.getEnergy() + rd.getPower());
 					}
 				}
@@ -333,6 +363,8 @@ public class Simulation {
 		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MAX, numGens, maxFitness);
 		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG, numGens, avgFitness);
 		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_MIN, numGens, minFitness);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG_NUTRIENTS, numGens, this.avgNutrients);
+		GeneTrees.fitnessPanel.addPoint(GeneTrees.GRAPHDATA_FITNESS_AVG_ENERGY, numGens, this.avgEnergy);
 		
 		// update population graph
 		if (trees.size() > maxTreesAlltime)
@@ -402,18 +434,24 @@ public class Simulation {
 		// check trees for which to reproduce
 		HashSet<GeneTree> toAdd = new HashSet<GeneTree>();
 		for (GeneTree t : trees) {
-			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {
+//			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {
+//				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
+//				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - EnvironmentParameters.NODE_MINIMUM_SIZE);
+//				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
+//					toAdd.add(newTree);
+//			}
+			for (long i = t.getFitness(); i > 0; i -= EnvironmentParameters.TREE_FITNESS_PER_CHILD_PER_NODE * t.getNumNodes()) {
 				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
 				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - EnvironmentParameters.NODE_MINIMUM_SIZE);
-				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
+				if (newTree.getRoot().getPos()[0] < env.getEnvWidth() && newTree.getRoot().getPos()[0] > 0)
 					toAdd.add(newTree);
 			}
 			t.resetFitness();
 		}
 		trees.addAll(toAdd);
 		
-		// if there are less than 100 trees left, repopulate
-		while (trees.size() < 100) {
+		// Add a certain number of completely random trees regardless of circumstance
+		for (int i = 0; i < EnvironmentParameters.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION; i++) {
 			double xPos = random.nextDouble()*env.getEnvWidth();
 			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - EnvironmentParameters.NODE_MINIMUM_SIZE));
 		}
@@ -424,8 +462,10 @@ public class Simulation {
 		// get set of trees (for convenience)
 		HashSet<GeneTree> trees = env.getTrees();
 		
-		// recompute fitness of each tree
+		// recompute fitness, nutrients, and energy of each tree
 		long totalFitness = 0;
+		long totalNutrients = 0;
+		long totalEnergy = 0;
 		maxFitness = Integer.MIN_VALUE;
 		minFitness = Integer.MAX_VALUE;
 		for (GeneTree t : trees) {
@@ -433,8 +473,12 @@ public class Simulation {
 			totalFitness += thisFitness;
 			if (thisFitness > maxFitness) maxFitness = thisFitness;
 			if (thisFitness < minFitness) minFitness = thisFitness;
+			totalNutrients += t.getNutrients();
+			totalEnergy += t.getEnergy();
 		}
 		avgFitness = totalFitness/trees.size();
+		avgNutrients = totalNutrients/trees.size();
+		avgEnergy = totalEnergy/trees.size();
 		
 		// evaluate each tree's chance to reproduce
 		List<GeneTree> treesSorted = new ArrayList<GeneTree>(trees);

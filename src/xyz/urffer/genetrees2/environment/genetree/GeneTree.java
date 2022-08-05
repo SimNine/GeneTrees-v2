@@ -70,7 +70,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	
 
 	public void draw(Graphics g, int xScr, int yScr) {
-		for (TreeNode n : root.getNodes()) {
+		for (TreeNode n : root.getDescendants()) {
 			int nodeRadius = n.getSize() / 2;
 			
 			// if this isn't the root node, draw its branch to its parent
@@ -146,18 +146,22 @@ public class GeneTree implements Comparable<GeneTree> {
 
 	// gather nutrients through root nodes, and calculate fitness decay
 	public void tick() {
-		for (TreeNode n : root.getNodes()) {
+		for (TreeNode n : root.getDescendants()) {
 			// if this is a root node, and it is belowground, gradually increment its fitness
 			if (n.getType() == NodeType.Root && 
 				n.getPos()[1] + n.getSize() / 2 > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2)) {
-				nutrients += (EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE * n.getSize());
+				n.setActivated(true);
+				double distanceUnderground = (n.getPos()[1] + n.getSize() / 2) - 
+											 GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2);
+				nutrients += (EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE * n.getSize() *
+							  distanceUnderground * EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_DEPTH);
 			}
 
 			// decrement fitness proportional to the size of this node,
 			// moreso if it is a structure node
 			if (n.getType() == NodeType.Struct) {
 				fitness -= n.getSize() * EnvironmentParameters.NODE_STRUCT_FITNESS_DECAY_PER_SIZE;
-			} else if (n.isActivated() || n.getType() == NodeType.Root) {
+			} else if (n.isActivated()) {
 				fitness -= n.getSize() * EnvironmentParameters.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE;
 			} else {
 				fitness -= n.getSize() * EnvironmentParameters.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE;
@@ -189,7 +193,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	 */
 	@SuppressWarnings("unused")
 	private void printTree() {
-		for (TreeNode n : root.getNodes()) {
+		for (TreeNode n : root.getDescendants()) {
 			System.out.println("pos: " + n.getPos()[0] + "," + n.getPos()[1]);
 			System.out.println(" ");
 		}
@@ -210,11 +214,11 @@ public class GeneTree implements Comparable<GeneTree> {
 	}
 
 	public int getNumNodes() {
-		return root.getNodes().size();
+		return root.getDescendants().size();
 	}
 
 	public ArrayList<TreeNode> getAllNodes() {
-		return new ArrayList<TreeNode>(root.getNodes());
+		return new ArrayList<TreeNode>(root.getDescendants());
 	}
 
 	public int getAge() {

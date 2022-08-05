@@ -54,7 +54,7 @@ public class Environment {
 		}
 		
 		// populate the list of trees
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < EnvironmentParameters.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION; i++) {
 			double xPos = random.nextDouble()*envWidth;
 			trees.add(new GeneTree(random, (int)(xPos), (int)getGroundLevel(xPos)));
 		}
