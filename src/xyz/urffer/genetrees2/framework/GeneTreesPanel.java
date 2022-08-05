@@ -58,7 +58,9 @@ public class GeneTreesPanel extends PannablePanel {
 					sim.setMultithreading(!sim.isMultithreading());
 					break;
 				case KeyEvent.VK_T:
-					sim.tick();
+					if (!sim.isRunning()) {
+						sim.tick();
+					}
 					break;
 				}
 			}

@@ -1,25 +1,36 @@
-# GeneTrees v2
-Debug information, including ticks per sec and multithreading,
-is printed to stdout when run from the console
+# GeneTrees-v2
+GeneTrees-v2 is a toy that simulates artificial tree-like organisms and 
+mutates them based on fitness, simulating evolution.
 
-Keybindings:
-F1 - Save current generation in "saves" folder
-F2 - Load a generation from "saves" folder
-Arrow Keys - Pan view
-LShift + Arrow Keys - Pan faster
-LCtrl + LShift + Arrow Keys - Pan much faster
-P - Pause simulation
-D - Toggle debug features
-Q - Stop visual rendering (but keep simulating; speeds up simulation)
-M - Toggle multithreading
+![](docs/overview.PNG)
+
+## Usage
+
+Can be run without arguments, either via jarfile or compilation.
+
+## Controls
+Main window:
+ - Click and drag - pan view
+ - P - Pause simulation
+ - D - Toggle debug features
+ - Q - Stop visual rendering (but keep simulating)
+ - M - Toggle multithreading
+ - T - Execute a single tick; only works if simulation is not currently running
 
 Click on a tree to track it.
 This displays additional information about it in the upper-left corner,
 and displays the tree seperately in the lower-right corner.
 
+![](docs/selected_tree.PNG)
+
 The graph windows cannot be reopened once closed.
 Graph window controls:
-A and D - Zoom horizontally
-W and S - Zoom vertically
-R - autofit to data
-Arrow keys - Pan
+ - Click and drag - pan view
+ - Scroll - scale vertical axis
+ - CTRL+Scroll - scale horizontal axis
+
+## Examples
+
+Running for 300 generations:
+
+![](docs/300_gens.webp)
