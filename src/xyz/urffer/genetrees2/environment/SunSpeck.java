@@ -12,7 +12,11 @@ public class SunSpeck extends Particle {
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
-		g.setColor(Color.YELLOW);
+		if (this.isConsumed) {
+			g.setColor(Color.BLACK);
+		} else {
+			g.setColor(Color.YELLOW);
+		}
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
 		
 		if (GeneTrees.debug) {

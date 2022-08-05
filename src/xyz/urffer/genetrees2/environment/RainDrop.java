@@ -12,7 +12,11 @@ public class RainDrop extends Particle {
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
-		g.setColor(Color.BLUE);
+		if (this.isConsumed) {
+			g.setColor(Color.BLACK);
+		} else {
+			g.setColor(Color.BLUE);
+		}
 		g.drawRect(x - xScr - 1, y - yScr - 1, 3, 3);
 		
 		if (GeneTrees.debug) {

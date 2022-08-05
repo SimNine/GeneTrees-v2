@@ -54,6 +54,9 @@ public class Simulation {
 			}
 		}
 	});
+	// create sets of particles to remove when collision checking is done - necessary to store outside of function due to threading
+	private volatile Set<SunSpeck> remSun = Collections.synchronizedSet(new HashSet<SunSpeck>());
+	private volatile Set<RainDrop> remRain = Collections.synchronizedSet(new HashSet<RainDrop>());
 	
 	// variables to adjust graphs
 	private long minAlltime = Long.MAX_VALUE;
@@ -169,9 +172,6 @@ public class Simulation {
 			List<Set<SunSpeck>> sunSets = SetUtils.partitionSet(env.getSun(), this.numThreads);
 			List<Set<RainDrop>> rainSets = SetUtils.partitionSet(env.getRain(), this.numThreads);
 			
-			// create sets of particles to remove when collision checking is done
-			Set<SunSpeck> remSun = Collections.synchronizedSet(new HashSet<SunSpeck>());
-			Set<RainDrop> remRain = Collections.synchronizedSet(new HashSet<RainDrop>());
 			
 			// create tasks
 			for (int i = 0; i < sunSets.size(); i++) {
@@ -191,26 +191,22 @@ public class Simulation {
 			
 			// remove particles that have collided
 			env.getSun().removeAll(remSun);
+			remSun.clear();
 			env.getRain().removeAll(remRain);
-			
-			// tick each tree's root nodes and wasted fitness
-			for (GeneTree t : env.getTrees()) {
-				t.tick();
-			}
-			computeFitness();
+			remRain.clear();
 		} else {
 			Set<SunSpeck> remSun = collideSunWithTrees(env.getSun(), env.getTrees());
 			env.getSun().removeAll(remSun);
 			Set<RainDrop> remRain = collideRainWithTrees(env.getRain(), env.getTrees());
 			env.getRain().removeAll(remRain);
-			// tick each tree's root nodes and wasted fitness
-			for (GeneTree t : env.getTrees()) {
-				t.tick();
-			}
-			computeFitness();
 		}
+		// tick each tree's root nodes and wasted fitness
+		for (GeneTree t : env.getTrees()) {
+			t.tick();
+		}
+		computeFitness();
 		
-		// each 1000 ticks, try to reproduce or kill each tree
+		// After a certain number of ticks, try to reproduce or kill each tree
 		tickCount++;
 		if (tickCount % EnvironmentParameters.ENVIRONMENT_TICKS_PER_GENERATION == 0) {
 			updateGraphs();
@@ -263,14 +259,18 @@ public class Simulation {
 			}
 			
 			for (GeneTree t : trees) {
+				if (!ss.collidesWithTree(t)) {
+					continue;
+				}
+				
 				for (TreeNode n : t.getAllNodes()) {
 					// if the sunspeck hits this node, remove it
 					if (ss.collidesWithNode(n)) {
 						remSun.add(ss);
+						ss.consume();
 
 						// if this node is a leaf, increment its fitness
 						if (n.getType() == NodeType.Leaf) {
-							ss.consume();
 							n.setActivated(true);
 							t.setEnergy(t.getEnergy() + ss.getPower());
 						}
@@ -298,6 +298,10 @@ public class Simulation {
 			}
 			
 			for (GeneTree t : trees) {
+				if (!rd.collidesWithTree(t)) {
+					continue;
+				}
+				
 				for (TreeNode n : t.getAllNodes()) {
 					if (n.getType() != NodeType.Raincatcher) {
 						continue;

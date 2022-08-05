@@ -1,5 +1,6 @@
 package xyz.urffer.genetrees2.environment;
 
+import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 import xyz.urffer.genetrees2.environment.genetree.TreeNode;
 
 public abstract class Particle {
@@ -28,6 +29,15 @@ public abstract class Particle {
 	}
 	
 	public abstract void tick();
+	
+	public boolean collidesWithTree(GeneTree t) {
+		if (this.x < t.getxMin() || this.x > t.getxMax() ||
+			this.y < t.getyMin() || this.y > t.getyMax()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 	public boolean collidesWithNode(TreeNode n) {
 		int nr = n.getSize() / 2;
