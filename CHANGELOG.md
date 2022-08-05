@@ -10,6 +10,10 @@ This project **does not** adhere to [Semantic Versioning](https://semver.org/spe
 
 This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1 simulated only one tree at a time, GeneTrees-v2 simulates many trees at once, thus allowing interaction between trees.
 
+## [Unreleased]
+
+- Many, many features. Will update changelog soon
+
 ## [0.6.0] - 2018-04-30
 
 ### Added
@@ -66,7 +70,7 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 - A "warmup" now occurs before any particle collisions with trees are calculated
 	- During "warmup", the environment is populated with particles
 
-## [0.1.0] - 2017-06-11 (FORGOT TO COMPILE)
+## 0.1.0 - 2017-06-11 (Did not use version control)
 
 ### Added
  - Created project as a branch of GeneTrees-v1
@@ -77,3 +81,13 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 ### Changed
  - Structure nodes now consume 4x as much fitness as leaf or root nodes; 
  - One sunlight and one nutrient are now converted into 4 fitness
+
+[UrfJavaUtils]: https://github.com/SimNine/UrfJavaUtils
+
+[Unreleased]: https://github.com/SimNine/GeneTrees-v2/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/SimNine/GeneTrees-v2/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/SimNine/GeneTrees-v2/commits/v0.2.0
