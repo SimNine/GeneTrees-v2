@@ -2,11 +2,15 @@ package xyz.urffer.genetrees2.framework;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+
+import javax.swing.Timer;
 
 import xyz.urffer.genetrees2.environment.EnvironmentParameters;
 import xyz.urffer.genetrees2.environment.genetree.GeneTree;
@@ -18,6 +22,15 @@ import xyz.urffer.urfutils.pannablepanel.PannablePanel;
 public class GeneTreesPanel extends PannablePanel {
 	
 	private Simulation sim;
+	
+	private Timer repaintTimer = new Timer(1000/60, new ActionListener() {
+		public void actionPerformed(ActionEvent evt) {
+			if (isDrawing) {
+				repaint();
+			}
+		}
+	});
+	private boolean isDrawing = true;
 	
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
@@ -40,7 +53,7 @@ public class GeneTreesPanel extends PannablePanel {
 					Loader.loadGame();
 					break;
 				case KeyEvent.VK_Q:
-					sim.setDrawing(!sim.isDrawing());
+					isDrawing = !isDrawing;
 					break;
 				case KeyEvent.VK_M:
 					sim.setMultithreading(!sim.isMultithreading());
@@ -67,6 +80,8 @@ public class GeneTreesPanel extends PannablePanel {
 			}
 			public void mouseMoved(MouseEvent e) {}
 		});
+		
+		this.repaintTimer.start();
 	}
 
 	public void paintComponent(Graphics g) {
@@ -108,7 +123,11 @@ public class GeneTreesPanel extends PannablePanel {
 		g.drawString("Pause drawing (but continue simulation): Q", 0, fh*ln++);
 		g.drawString("Toggle debug features: D", 0, fh*ln++);
 		g.drawString("Toggle multithreading: M", 0, fh*ln++);
-		g.drawString("Toggle unbound tick speed: O", 0, fh*ln++);
+		ln++;
+		g.drawString("Is running: " + sim.isRunning(), 0, fh*ln++);
+		g.drawString("Is drawing: " + isDrawing, 0, fh*ln++);
+		g.drawString("Is debug: " + GeneTrees.debug, 0, fh*ln++);
+		g.drawString("Is multithreading: " + sim.isMultithreading(), 0, fh*ln++);
 	}
 	
 	private void drawTrackedTree(Graphics g) {

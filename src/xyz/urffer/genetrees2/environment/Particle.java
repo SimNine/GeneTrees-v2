@@ -6,11 +6,13 @@ public abstract class Particle {
 	protected int x;
 	protected int y;
 	protected long power;
+	protected boolean isConsumed;
 	
 	public Particle(int x, int y, long power) {
 		this.x = x;
 		this.y = y;
 		this.power = power;
+		this.isConsumed = false;
 	}
 
 	public int getXPos() {
@@ -33,6 +35,14 @@ public abstract class Particle {
 		int nr = n.getSize() / 2;
 
 		return ((nx - x) * (nx - x) + (ny - y) * (ny - y) < nr * nr);
+	}
+	
+	public boolean isConsumed() {
+		return this.isConsumed;
+	}
+	
+	public void consume() {
+		this.isConsumed = true;
 	}
 	
 }

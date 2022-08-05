@@ -226,7 +226,7 @@ public class TreeNode {
 		if (this.yPos - size/2 < owner.getyMin()) {
 			owner.setyMin(yPos - size/2);
 		}
-		if (this.yPos - size/2 > owner.getyMax()) {
+		if (this.yPos + size/2 > owner.getyMax()) {
 			owner.setyMax(yPos + size/2);
 		}
 	}
