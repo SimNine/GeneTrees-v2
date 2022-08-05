@@ -11,8 +11,64 @@ This project **does not** adhere to [Semantic Versioning](https://semver.org/spe
 This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1 simulated only one tree at a time, GeneTrees-v2 simulates many trees at once, thus allowing interaction between trees.
 
 ## [Unreleased]
+- Nothing yet
 
-- Many, many features. Will update changelog soon
+## [0.7.0] - 2022-08-05
+
+### Added
+- Multi-tabbed graph display
+	- "Population" panel, showing the total tree population per generation
+	- "Node stats" panel, showing the average number of each type of node per generation
+	- "Particles" panel, showing the total number of each type of particle created per generation
+	- "Performance" panel, showing the average computation time per generation
+- Deterministic simulation generation and reproducibility through Java.Random seeding
+- Javadocs on some heavily-used methods and classes
+- Static class "EnvironmentParameters" containing nearly all environment, mutation, reproduction, and physics constants which can be tuned for fine-grained simulation control, such as:
+	- Environment seed
+	- Environment dimensions
+	- Environment ground elevation
+	- Number of ticks per generation
+	- RainDrop/SunSpeck base power and power decay
+	- Root node nutrient collection per size
+	- Node fitness decay per size
+	- Node minimum size and minimum distance from parent
+	- Node chance to add/lose a child
+	- ...and many more
+- Option to generate an image of the entire environment to a directory at the end of each generation
+- Key to trigger a single tick
+- Two new data series to "Firness" graph panel
+	- Average nutrients (root node resource) per tree
+	- Average energy (leaf/raincatcher node resource) per tree
+
+### Changed
+- Main display is now pannable
+- Restructured package. Now follows correct Java package naming conventions
+- Simulation logic abstracted out of GeneTreePanel class, into Simulation class
+- Environment state abstracted out of GeneTreePanel class, into Environment class
+- Abstracted common features of SunSpeck/RainDrop into "Particle" class
+- Redid multithreading; it now divides the set of particles into equal-sized sets, and each thread computes collision for the particles in its subset
+- Node coordinates now refer to the top-left corner of the node, rather than the center of the node
+- Greatly improved particle collision detection by immediately skipping any trees that do not intersect with a particle, rather than checking each node anyway
+- Changed child tree mutation to be chance-based, rather than guaranteed
+- Changed root nodes to calculate fitness based on root depth and size, rather than size alone
+- Improved caching of GeneTree's nodes by making it unnecessary to recurse through all nodes each time
+- Changed reproduction to be based on surplus fitness alone, rather than fitness percentile
+	- It costs a certain amount of fitness per parent node to produce a child
+	- As many children as possible will be created given the parent's fitness
+- Changed CHANGELOG.md and README.md to markdown
+
+### Removed
+- Tick timer and constrained tick speed. Ticks now happen as fast as possible by default
+- 'build' folder with outdated binary
+
+### Fixed
+- Particles being absorbed by more than one tree if they collide with more than one tree in a single tick. Added "isConsumed" check to particle collision detection
+- Highlighting bounds of selected trees
+- Highlighting nodes that are being hovered over while debug is on
+- Incorrect removal of energy from a tree when it would catch a particle with negative energy; negative energy particles are now ignored
+
+### Broke
+- Saving/loading
 
 ## [0.6.0] - 2018-04-30
 
@@ -84,7 +140,8 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 
 [UrfJavaUtils]: https://github.com/SimNine/UrfJavaUtils
 
-[Unreleased]: https://github.com/SimNine/GeneTrees-v2/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/SimNine/GeneTrees-v2/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.3.0...v0.4.0
