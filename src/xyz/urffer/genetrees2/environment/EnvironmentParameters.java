@@ -9,7 +9,7 @@ public class EnvironmentParameters {
 	public static final long ENVIRONMENT_SEED = 3;
 
 	public static final int ENVIRONMENT_WIDTH = 6000;
-	public static final int ENVIRONMENT_HEIGHT = 2000;
+	public static final int ENVIRONMENT_HEIGHT = 1200;
 	public static final int ENVIRONMENT_GROUND_ELEVATION = 600;
 
 	public static final int ENVIRONMENT_NUM_WARMUP_TICKS = 1000;
@@ -39,6 +39,8 @@ public class EnvironmentParameters {
 	
 	
 	// mutation
+	
+	public static final double TREE_BASE_MUTATION_CHANCE = 0.3;
 	
 	public static final int NODE_MINIMUM_SIZE = 10;
 	public static final double NODE_MINIMUM_DISTANCE = 40.0;

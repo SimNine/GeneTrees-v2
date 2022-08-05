@@ -51,7 +51,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	}
 
 	/**
-	 * Create a new genetree as a child of the given one. The child genetree will be a mutated version of its parent.
+	 * Create a new genetree as a child of the given one. The child genetree will be a identical to its parent, unless it mutates.
 	 * 
 	 * @param random		The random number generator
 	 * @param parentTree	The parent tree to create a mutated child of
@@ -60,7 +60,9 @@ public class GeneTree implements Comparable<GeneTree> {
 	 */
 	public GeneTree(Random random, GeneTree parentTree, int x, int y) {
 		this(random, new TreeNode(random, x, y, null, null, parentTree.getRoot()));
-		root.mutate();
+		if (random.nextDouble() < EnvironmentParameters.TREE_BASE_MUTATION_CHANCE) {
+			root.mutate();
+		}
 		root.initLocation();
 
 		age = parentTree.getAge() + 1;
