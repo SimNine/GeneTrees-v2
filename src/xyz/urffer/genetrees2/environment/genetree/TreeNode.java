@@ -10,8 +10,7 @@ public class TreeNode {
 	private int size; // diameter in pixels
 	private double dist; // distance from parent
 	private int angle; // angle (clockwise) from directly below parent
-	private int xPos; // xPos of the center
-	private int yPos; // yPos of the center
+	private int[] pos; // position of the top-left corner
 	
 	private boolean activated = false; // whether this node has been used (or is vestigial)
 	
@@ -40,8 +39,7 @@ public class TreeNode {
 		this.random = random;
 		this.parent = parent;
 		this.owner = owner;
-		this.xPos = x;
-		this.yPos = y;
+		this.pos = new int[]{x, y};
 		
 		this.size = tgt.getSize();
 		this.type = tgt.getType();
@@ -67,8 +65,7 @@ public class TreeNode {
 		this.random = random;
 		this.parent = parent;
 		this.owner = owner;
-		this.xPos = x;
-		this.yPos = y;
+		this.pos = new int[]{x, y};
 		
 		this.size = (int)(random.nextDouble()*9.0) + EnvironmentParameters.NODE_MINIMUM_SIZE;
 		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
@@ -149,10 +146,10 @@ public class TreeNode {
 	public void initLocation() {
 		// if this node is the root node
 		if (this.parent == null) {
-			owner.setxMin(xPos - size/2);
-			owner.setyMin(yPos - size/2);
-			owner.setxMax(xPos + size/2);
-			owner.setyMax(yPos + size/2);
+			owner.setxMin(pos[0]);
+			owner.setyMin(pos[1]);
+			owner.setxMax(pos[0] + size);
+			owner.setyMax(pos[1] + size);
 			
 			// initialize the location of children
 			for (TreeNode n : children) {
@@ -185,29 +182,29 @@ public class TreeNode {
 		// NOT THE OTHER WAY AROUND
 		// (hence the wonky sin and cos)
 		if (angle == 0) {
-			xPos = parent.getXPos();
-			yPos = parent.getYPos() - (int)dist;
+			pos[0] = parent.getPos()[0];
+			pos[1] = parent.getPos()[1] - (int)dist;
 		} else if (angle < 90) {
-			xPos = parent.getXPos() + (int)(Math.sin(angleInRads)*dist);
-			yPos = parent.getYPos() - (int)(Math.cos(angleInRads)*dist);
+			pos[0] = parent.getPos()[0] + (int)(Math.sin(angleInRads)*dist);
+			pos[1] = parent.getPos()[1] - (int)(Math.cos(angleInRads)*dist);
 		} else if (angle == 90) {
-			xPos = parent.getXPos() + (int)dist;
-			yPos = parent.getYPos();
+			pos[0] = parent.getPos()[0] + (int)dist;
+			pos[1] = parent.getPos()[1];
 		} else if (angle > 90 && angle < 180) {
-			xPos = parent.getXPos() + (int)(Math.cos(angleInRads)*dist);
-			yPos = parent.getYPos() + (int)(Math.sin(angleInRads)*dist);
+			pos[0] = parent.getPos()[0] + (int)(Math.cos(angleInRads)*dist);
+			pos[1] = parent.getPos()[1] + (int)(Math.sin(angleInRads)*dist);
 		} else if (angle == 180) {
-			xPos = parent.getXPos();
-			yPos = parent.getYPos() + (int)dist;
+			pos[0] = parent.getPos()[0];
+			pos[1] = parent.getPos()[1] + (int)dist;
 		} else if (angle > 180 && angle < 270) {
-			xPos = parent.getXPos() - (int)(Math.sin(angleInRads)*dist);
-			yPos = parent.getYPos() + (int)(Math.cos(angleInRads)*dist);
+			pos[0] = parent.getPos()[0] - (int)(Math.sin(angleInRads)*dist);
+			pos[1] = parent.getPos()[1] + (int)(Math.cos(angleInRads)*dist);
 		} else if (angle == 270) {
-			xPos = parent.getXPos() - (int)dist;
-			yPos = parent.getYPos();
+			pos[0] = parent.getPos()[0] - (int)dist;
+			pos[1] = parent.getPos()[1];
 		} else if (angle > 270 && angle < 360) {
-			xPos = parent.getXPos() - (int)(Math.cos(angleInRads)*dist);
-			yPos = parent.getYPos() - (int)(Math.sin(angleInRads)*dist);
+			pos[0] = parent.getPos()[0] - (int)(Math.cos(angleInRads)*dist);
+			pos[1] = parent.getPos()[1] - (int)(Math.sin(angleInRads)*dist);
 		} else {
 			throw new IllegalStateException("illegal angle of: " + angle);
 		}
@@ -217,17 +214,17 @@ public class TreeNode {
 			n.initLocation();
 		}
 		
-		if (this.xPos - size/2 < owner.getxMin()) {
-			owner.setxMin(xPos - size/2);
+		if (this.pos[0] < owner.getxMin()) {
+			owner.setxMin(this.pos[0]);
 		}
-		if (this.xPos + size/2 > owner.getxMax()) {
-			owner.setxMax(xPos + size/2);
+		if (this.pos[0] + size > owner.getxMax()) {
+			owner.setxMax(this.pos[0] + size);
 		}
-		if (this.yPos - size/2 < owner.getyMin()) {
-			owner.setyMin(yPos - size/2);
+		if (this.pos[1] < owner.getyMin()) {
+			owner.setyMin(this.pos[1]);
 		}
-		if (this.yPos + size/2 > owner.getyMax()) {
-			owner.setyMax(yPos + size/2);
+		if (this.pos[1] + size > owner.getyMax()) {
+			owner.setyMax(this.pos[1] + size);
 		}
 	}
 	
@@ -278,12 +275,8 @@ public class TreeNode {
 		return angle;
 	}
 	
-	public int getXPos() {
-		return xPos;
-	}
-	
-	public int getYPos() {
-		return yPos;
+	public int[] getPos() {
+		return pos;
 	}
 	
 	public void addNewChild() {
@@ -337,10 +330,10 @@ public class TreeNode {
 	}
 	
 	public void setXPos(int xPos) {
-		this.xPos = xPos;
+		this.pos[0] = xPos;
 	}
 	
 	public void setYPos(int yPos) {
-		this.yPos = yPos;
+		this.pos[1] = yPos;
 	}
 }

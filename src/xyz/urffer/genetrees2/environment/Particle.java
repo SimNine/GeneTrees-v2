@@ -30,9 +30,9 @@ public abstract class Particle {
 	public abstract void tick();
 	
 	public boolean collidesWithNode(TreeNode n) {
-		int nx = n.getXPos();
-		int ny = n.getYPos();
 		int nr = n.getSize() / 2;
+		int nx = n.getPos()[0] + nr;
+		int ny = n.getPos()[1] + nr;
 
 		return ((nx - x) * (nx - x) + (ny - y) * (ny - y) < nr * nr);
 	}

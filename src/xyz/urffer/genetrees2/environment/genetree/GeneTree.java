@@ -17,7 +17,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	private TreeNode root;
 	private int age; // the number of mutations this tree is from generation 0
 
-	private int xMin = 0, xMax = 0, yMin = 0, yMax = 0, width, height;
+	private int xMin = 0, xMax = 0, yMin = 0, yMax = 0;
 	
 	private Random random;
 	
@@ -34,8 +34,6 @@ public class GeneTree implements Comparable<GeneTree> {
 		root = n;
 		root.setOwner(this);
 		root.initLocation();
-		width = Math.abs(xMax) - Math.abs(xMin);
-		height = Math.abs(yMax) - Math.abs(yMin);
 	}
 
 	/**
@@ -71,11 +69,14 @@ public class GeneTree implements Comparable<GeneTree> {
 
 	public void draw(Graphics g, int xScr, int yScr) {
 		for (TreeNode n : root.getNodes()) {
+			int nodeRadius = n.getSize() / 2;
+			
 			// if this isn't the root node, draw its branch to its parent
 			if (n.getParent() != null) {
+				int parentRadius = n.getParent().getSize() / 2;
 				g.setColor(Color.BLACK);
-				g.drawLine(n.getXPos() - xScr, n.getYPos() - yScr, 
-						   n.getParent().getXPos() - xScr, n.getParent().getYPos() - yScr);
+				g.drawLine(n.getPos()[0] + nodeRadius - xScr, n.getPos()[1] + nodeRadius - yScr, 
+						   n.getParent().getPos()[0] + parentRadius - xScr, n.getParent().getPos()[1] + parentRadius - yScr);
 			}
 
 			switch (n.getType()) {
@@ -99,8 +100,8 @@ public class GeneTree implements Comparable<GeneTree> {
 				throw new IllegalArgumentException("invalid node type");
 			}
 
-			int xTL = n.getXPos() - n.getSize() / 2 - xScr;
-			int yTL = n.getYPos() - n.getSize() / 2 - yScr;
+			int xTL = n.getPos()[0] - xScr;
+			int yTL = n.getPos()[1] - yScr;
 			g.fillOval(xTL, yTL, n.getSize(), n.getSize());
 
 			// if debug mode, draw bounding boxes
@@ -117,16 +118,16 @@ public class GeneTree implements Comparable<GeneTree> {
 
 					// highlight its parent
 					if (n.getParent() != null) {
-						int xTLparent = n.getParent().getXPos() - n.getParent().getSize() / 2 - xScr;
-						int yTLparent = n.getParent().getYPos() - n.getParent().getSize() / 2 - yScr;
+						int xTLparent = n.getParent().getPos()[0] - xScr;
+						int yTLparent = n.getParent().getPos()[1] - yScr;
 						g.setColor(Color.CYAN);
 						g.drawRect(xTLparent, yTLparent, n.getParent().getSize(), n.getParent().getSize());
 					}
 
 					// hightlight its children
 					for (TreeNode nc : n.getChildren()) {
-						int xTLchild = nc.getXPos() - nc.getSize() / 2 - xScr;
-						int yTLchild  = nc.getYPos() - nc.getSize() / 2 - yScr;
+						int xTLchild = nc.getPos()[0] - xScr;
+						int yTLchild  = nc.getPos()[1] - yScr;
 						g.setColor(Color.MAGENTA);
 						g.drawRect(xTLchild, yTLchild, nc.getSize(), nc.getSize());
 					}
@@ -135,7 +136,8 @@ public class GeneTree implements Comparable<GeneTree> {
 
 			if (GeneTrees.panel.getSimulation().getTrackedTree() == this) {
 				g.setColor(Color.ORANGE);
-				g.drawRect(xMin - xScr, yMin - yScr, width, height);
+				g.drawRect(xMin - xScr, yMin - yScr, 
+						   xMax - xMin, yMax - yMin);
 			}
 		}
 	}
@@ -143,8 +145,9 @@ public class GeneTree implements Comparable<GeneTree> {
 	// gather nutrients through root nodes, and calculate fitness decay
 	public void tick() {
 		for (TreeNode n : root.getNodes()) {
-			// if this is a root node, gradually increment its fitness
-			if (n.getType() == NodeType.Root && n.getYPos() > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getXPos())) {
+			// if this is a root node, and it is belowground, gradually increment its fitness
+			if (n.getType() == NodeType.Root && 
+				n.getPos()[1] + n.getSize() / 2 > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2)) {
 				nutrients += (EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE * n.getSize());
 			}
 
@@ -185,8 +188,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	@SuppressWarnings("unused")
 	private void printTree() {
 		for (TreeNode n : root.getNodes()) {
-			System.out.println("x: " + n.getXPos());
-			System.out.println("y: " + n.getYPos());
+			System.out.println("pos: " + n.getPos()[0] + "," + n.getPos()[1]);
 			System.out.println(" ");
 		}
 	}

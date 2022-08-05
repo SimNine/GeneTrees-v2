@@ -399,8 +399,8 @@ public class Simulation {
 		HashSet<GeneTree> toAdd = new HashSet<GeneTree>();
 		for (GeneTree t : trees) {
 			for (int i = 0; i < (int)((t.getFitnessPercentage() - 0.4)/0.2); i++) {
-				double newXPos = t.getRoot().getXPos() + (random.nextDouble()-0.5)*200;
-				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos));
+				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
+				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - EnvironmentParameters.NODE_MINIMUM_SIZE);
 				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
 					toAdd.add(newTree);
 			}
@@ -411,7 +411,7 @@ public class Simulation {
 		// if there are less than 100 trees left, repopulate
 		while (trees.size() < 100) {
 			double xPos = random.nextDouble()*env.getEnvWidth();
-			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos)));
+			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - EnvironmentParameters.NODE_MINIMUM_SIZE));
 		}
 	}
 	
