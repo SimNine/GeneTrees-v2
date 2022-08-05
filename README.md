@@ -5,8 +5,9 @@ mutates them based on fitness, simulating evolution.
 ![](docs/overview.PNG)
 
 ## Usage
-
-Can be run without arguments, either via jarfile or compilation.
+- Install [Java](https://www.java.com/en/download/)
+- Download [GeneTrees-v2 jar file](https://github.com/SimNine/GeneTrees-v2/releases/latest)
+- Run GeneTrees-v2 jar file
 
 ## Controls
 Main window:
