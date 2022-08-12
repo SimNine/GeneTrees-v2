@@ -27,3 +27,4 @@ archive/
 .classpath
 .project
 .settings/
+/target/
