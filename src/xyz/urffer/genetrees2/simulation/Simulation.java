@@ -190,7 +190,7 @@ public class Simulation {
 			
 			// spinlock to wait until tasks are done
 			while (threadPool.getActiveCount() > 0) {
-				Thread.onSpinWait();
+				// Thread.onSpinWait(); do nothing; this statement only works w/ Java 9+
 			}
 			
 			// remove particles that have collided

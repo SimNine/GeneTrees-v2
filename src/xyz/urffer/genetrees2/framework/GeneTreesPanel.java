@@ -46,10 +46,10 @@ public class GeneTreesPanel extends PannablePanel {
 					GeneTrees.debug = !GeneTrees.debug;
 					break;
 				case KeyEvent.VK_F1:
-					Loader.saveGame();
+					//Loader.saveGame();
 					break;
 				case KeyEvent.VK_F2:
-					Loader.loadGame();
+					//Loader.loadGame();
 					break;
 				case KeyEvent.VK_Q:
 					isDrawing = !isDrawing;
