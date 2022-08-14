@@ -1,6 +1,18 @@
-package xyz.urffer.genetrees2.environment;
+package xyz.urffer.genetrees2.framework;
 
-public class EnvironmentParameters {
+public class ParameterDefaultValues {
+	
+	// simulation
+	
+	public static final long SIMULATION_SEED = 10;
+	
+	
+	
+	public static final int NUM_THREADS = 15;
+	
+	public static final boolean TAKE_SNAPSHOTS = true;
+	
+	
 
 	// environment
 
@@ -54,5 +66,5 @@ public class EnvironmentParameters {
 	
 	public static final double NODE_ADD_CHILD_CHANCE = 0.30;
 	public static final double NODE_LOSE_CHILD_CHANCE = 0.10;
-
+	
 }

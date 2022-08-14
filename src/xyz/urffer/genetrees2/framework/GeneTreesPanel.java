@@ -14,7 +14,6 @@ import javax.swing.Timer;
 
 import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 import xyz.urffer.genetrees2.simulation.Simulation;
-import xyz.urffer.genetrees2.simulation.SimulationParameters;
 import xyz.urffer.urfutils.pannablepanel.PannablePanel;
 
 @SuppressWarnings("serial")
@@ -34,7 +33,8 @@ public class GeneTreesPanel extends PannablePanel {
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
 		
-		sim = new Simulation(SimulationParameters.SIMULATION_SEED, SimulationParameters.TAKE_SNAPSHOTS);
+		sim = new Simulation((long)ParameterLoader.getParam("simulation", ParameterNames.SIMULATION_SEED), 
+							 (boolean)ParameterLoader.getParam("simulation", ParameterNames.TAKE_SNAPSHOTS));
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {

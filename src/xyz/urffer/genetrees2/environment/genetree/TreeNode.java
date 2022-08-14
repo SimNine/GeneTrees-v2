@@ -3,7 +3,8 @@ package xyz.urffer.genetrees2.environment.genetree;
 import java.util.HashSet;
 import java.util.Random;
 
-import xyz.urffer.genetrees2.environment.EnvironmentParameters;
+import xyz.urffer.genetrees2.framework.ParameterLoader;
+import xyz.urffer.genetrees2.framework.ParameterNames;
 
 public class TreeNode {
 	private NodeType type;
@@ -70,9 +71,9 @@ public class TreeNode {
 		this.owner = owner;
 		this.pos = new int[]{x, y};
 		
-		this.size = (int)(random.nextDouble()*9.0) + EnvironmentParameters.NODE_MINIMUM_SIZE;
+		this.size = (int)(random.nextDouble()*9.0) + (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
 		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
-		this.dist = random.nextDouble()*30.0 + EnvironmentParameters.NODE_MINIMUM_DISTANCE;
+		this.dist = random.nextDouble()*30.0 + (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_DISTANCE);
 		this.angle = (int)(random.nextDouble()*360.0);
 		
 		// Try to mutate this new node
@@ -85,7 +86,7 @@ public class TreeNode {
 	public void mutate() {
 		
 		// Chance of mutating this node's type
-		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_TYPE_CHANCE) {
+		if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MUTATE_TYPE_CHANCE)) {
 			NodeType newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
 			while (newType != NodeType.Struct && random.nextDouble() < 0.40) // make it more likely that it mutates to a struct node
 				newType = NodeType.values()[(int)(random.nextDouble()*NodeType.values().length)];
@@ -99,19 +100,19 @@ public class TreeNode {
 		}
 		
 		// Chance of mutating this node's size
-		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_SIZE_CHANCE) {
+		if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MUTATE_SIZE_CHANCE)) {
 			int sizeInc = (int)(random.nextDouble()*16.0) - 16;
 			this.size += sizeInc;
 			
-			if (this.size < EnvironmentParameters.NODE_MINIMUM_SIZE) {
-				this.size = EnvironmentParameters.NODE_MINIMUM_SIZE;
+			if (this.size < (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)) {
+				this.size = (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
 			}
 		}
 		
 		// Chance to lose each child node, then recursively mutate each child
 		HashSet<TreeNode> toDelete = new HashSet<TreeNode>();
 		for (TreeNode n : children) {
-			if (random.nextDouble() < EnvironmentParameters.NODE_LOSE_CHILD_CHANCE) {
+			if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_LOSE_CHILD_CHANCE)) {
 				toDelete.add(n);
 			}
 			
@@ -121,24 +122,24 @@ public class TreeNode {
 		children.removeAll(toDelete);
 		
 		// Chance of adding child nodes if this is a structure node
-		while (this.type == NodeType.Struct && random.nextDouble() < EnvironmentParameters.NODE_ADD_CHILD_CHANCE) {
+		while (this.type == NodeType.Struct && random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_ADD_CHILD_CHANCE)) {
 			this.addNewChild();
 		}
 		
 		// Chance to mutate angle between this node and its parent
-		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_ANGLE_CHANCE) { 
+		if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MUTATE_ANGLE_CHANCE)) { 
 			int angleInc = (int)(random.nextDouble()*30) - 30; // by up to +/- 15 degs
 			angle += angleInc;
 		}
 		
 		// Chance of changing this node's distance from its parent
-		if (random.nextDouble() < EnvironmentParameters.NODE_MUTATE_DISTANCE_CHANCE) { 
+		if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MUTATE_DISTANCE_CHANCE)) { 
 			double distInc = random.nextDouble()*30.0 - 30;
 			dist += distInc;
 			
 			// Check for minimum distance
-			if (dist < EnvironmentParameters.NODE_MINIMUM_DISTANCE) {
-				dist = EnvironmentParameters.NODE_MINIMUM_DISTANCE;
+			if (dist < (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_DISTANCE)) {
+				dist = (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_DISTANCE);
 			}
 		}
 	}

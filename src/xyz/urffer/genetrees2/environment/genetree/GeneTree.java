@@ -5,8 +5,9 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Random;
 
-import xyz.urffer.genetrees2.environment.EnvironmentParameters;
 import xyz.urffer.genetrees2.framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.ParameterLoader;
+import xyz.urffer.genetrees2.framework.ParameterNames;
 
 public class GeneTree implements Comparable<GeneTree> {
 	private long fitness = 0;
@@ -60,7 +61,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	 */
 	public GeneTree(Random random, GeneTree parentTree, int x, int y) {
 		this(random, new TreeNode(random, x, y, null, null, parentTree.getRoot()));
-		if (random.nextDouble() < EnvironmentParameters.TREE_BASE_MUTATION_CHANCE) {
+		if (random.nextDouble() < (double)ParameterLoader.getParam("mutation", ParameterNames.TREE_BASE_MUTATION_CHANCE)) {
 			root.mutate();
 		}
 		root.initLocation();
@@ -153,18 +154,18 @@ public class GeneTree implements Comparable<GeneTree> {
 				n.setActivated(true);
 				double distanceUnderground = (n.getPos()[1] + n.getSize() / 2) - 
 											 GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2);
-				nutrients += (EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE * n.getSize() *
-							  distanceUnderground * EnvironmentParameters.NODE_ROOT_NUTRIENT_COLLECTION_PER_DEPTH);
+				nutrients += ((double)ParameterLoader.getParam("fitness", ParameterNames.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE) * n.getSize() *
+							  distanceUnderground * (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_ROOT_NUTRIENT_COLLECTION_PER_DEPTH));
 			}
 
 			// decrement fitness proportional to the size of this node,
 			// moreso if it is a structure node
 			if (n.getType() == NodeType.Struct) {
-				fitness -= n.getSize() * EnvironmentParameters.NODE_STRUCT_FITNESS_DECAY_PER_SIZE;
+				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_STRUCT_FITNESS_DECAY_PER_SIZE);
 			} else if (n.isActivated()) {
-				fitness -= n.getSize() * EnvironmentParameters.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE;
+				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE);
 			} else {
-				fitness -= n.getSize() * EnvironmentParameters.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE;
+				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE);
 			}
 		}
 
@@ -173,7 +174,7 @@ public class GeneTree implements Comparable<GeneTree> {
 		if (newFitness > 0) {
 			energy -= newFitness;
 			nutrients -= newFitness;
-			fitness += EnvironmentParameters.TREE_FITNESS_GAIN_PER_NUTRIENT_AND_POWER * newFitness;
+			fitness += (int)ParameterLoader.getParam("mutation", ParameterNames.TREE_FITNESS_GAIN_PER_NUTRIENT_AND_POWER) * newFitness;
 		}
 	}
 

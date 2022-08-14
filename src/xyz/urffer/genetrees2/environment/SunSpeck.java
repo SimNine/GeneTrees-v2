@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import xyz.urffer.genetrees2.framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.ParameterLoader;
+import xyz.urffer.genetrees2.framework.ParameterNames;
 
 public class SunSpeck extends Particle {
 	
 	public SunSpeck(int x, int y) {
-		super(x, y, EnvironmentParameters.SUNSPECK_BASE_POWER);
+		super(x, y, (long)ParameterLoader.getParam("particles", ParameterNames.SUNSPECK_BASE_POWER));
 	}
 
 	public void draw(Graphics g, int xScr, int yScr) {
@@ -26,6 +28,6 @@ public class SunSpeck extends Particle {
 	
 	public void tick() {
 		y++;
-		power += EnvironmentParameters.SUNSPECK_TICK_POWER_DELTA;
+		power += (long)ParameterLoader.getParam("particles", ParameterNames.SUNSPECK_TICK_POWER_DELTA);
 	}
 }

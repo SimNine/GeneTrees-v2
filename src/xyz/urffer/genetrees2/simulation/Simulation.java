@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import xyz.urffer.genetrees2.environment.Environment;
-import xyz.urffer.genetrees2.environment.EnvironmentParameters;
 import xyz.urffer.genetrees2.environment.Particle;
 import xyz.urffer.genetrees2.environment.RainDrop;
 import xyz.urffer.genetrees2.environment.SunSpeck;
@@ -21,6 +20,8 @@ import xyz.urffer.genetrees2.environment.genetree.GeneTree;
 import xyz.urffer.genetrees2.environment.genetree.NodeType;
 import xyz.urffer.genetrees2.environment.genetree.TreeNode;
 import xyz.urffer.genetrees2.framework.GeneTrees;
+import xyz.urffer.genetrees2.framework.ParameterLoader;
+import xyz.urffer.genetrees2.framework.ParameterNames;
 import xyz.urffer.urfutils.SetUtils;
 
 public class Simulation {
@@ -83,7 +84,9 @@ public class Simulation {
 		random = new Random(seed);
 		
 		// create a thread pool
-		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(SimulationParameters.NUM_THREADS);
+		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(
+				(int)ParameterLoader.getParam("simulation", ParameterNames.NUM_THREADS)
+		);
 		
 		// create the environment
 		double[] gFreq = { 0.002,
@@ -102,13 +105,13 @@ public class Simulation {
 				   		   random.nextDouble()*500,
 				   		   random.nextDouble()*500 };
 		env = new Environment(random, 
-							  EnvironmentParameters.ENVIRONMENT_WIDTH, 
-							  EnvironmentParameters.ENVIRONMENT_HEIGHT, 
-							  EnvironmentParameters.ENVIRONMENT_GROUND_ELEVATION, 
+							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_WIDTH), 
+							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_HEIGHT), 
+							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_GROUND_ELEVATION), 
 							  gFreq, gAmp, gDisp);
 		
 		// warm up the environment
-		warmupEnvironment(EnvironmentParameters.ENVIRONMENT_NUM_WARMUP_TICKS);
+		warmupEnvironment((int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_NUM_WARMUP_TICKS));
 		
 		// start the tick thread
 		tickThread.start();
@@ -173,8 +176,8 @@ public class Simulation {
 		collideParticlesWithGround(env.getRain());
 		if (multithreading) {
 			// divide particle pools into equal-sized chunks
-			List<Set<SunSpeck>> sunSets = SetUtils.partitionSet(env.getSun(), SimulationParameters.NUM_THREADS);
-			List<Set<RainDrop>> rainSets = SetUtils.partitionSet(env.getRain(), SimulationParameters.NUM_THREADS);
+			List<Set<SunSpeck>> sunSets = SetUtils.partitionSet(env.getSun(), threadPool.getMaximumPoolSize());
+			List<Set<RainDrop>> rainSets = SetUtils.partitionSet(env.getRain(), threadPool.getMaximumPoolSize());
 			
 			
 			// create tasks
@@ -212,7 +215,7 @@ public class Simulation {
 		
 		// After a certain number of ticks, try to reproduce or kill each tree
 		tickCount++;
-		if (tickCount % EnvironmentParameters.ENVIRONMENT_TICKS_PER_GENERATION == 0) {
+		if (tickCount % (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_TICKS_PER_GENERATION) == 0) {
 			updateGraphs();
 			advanceGeneration();
 		}
@@ -461,9 +464,9 @@ public class Simulation {
 //				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
 //					toAdd.add(newTree);
 //			}
-			for (long i = t.getFitness(); i > 0; i -= EnvironmentParameters.TREE_FITNESS_PER_CHILD_PER_NODE * t.getNumNodes()) {
+			for (long i = t.getFitness(); i > 0; i -= (int)ParameterLoader.getParam("fitness", ParameterNames.TREE_FITNESS_PER_CHILD_PER_NODE) * t.getNumNodes()) {
 				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
-				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - EnvironmentParameters.NODE_MINIMUM_SIZE);
+				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE));
 				if (newTree.getRoot().getPos()[0] < env.getEnvWidth() && newTree.getRoot().getPos()[0] > 0)
 					toAdd.add(newTree);
 			}
@@ -472,9 +475,9 @@ public class Simulation {
 		trees.addAll(toAdd);
 		
 		// Add a certain number of completely random trees regardless of circumstance
-		for (int i = 0; i < EnvironmentParameters.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION; i++) {
+		for (int i = 0; i < (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION); i++) {
 			double xPos = random.nextDouble()*env.getEnvWidth();
-			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - EnvironmentParameters.NODE_MINIMUM_SIZE));
+			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)));
 		}
 	}
 	

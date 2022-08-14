@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Random;
 
 import xyz.urffer.genetrees2.environment.genetree.GeneTree;
+import xyz.urffer.genetrees2.framework.ParameterLoader;
+import xyz.urffer.genetrees2.framework.ParameterNames;
 
 public class Environment {
 	private HashSet<GeneTree> trees = new HashSet<GeneTree>();
@@ -54,7 +56,7 @@ public class Environment {
 		}
 		
 		// populate the list of trees
-		for (int i = 0; i < EnvironmentParameters.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION; i++) {
+		for (int i = 0; i < (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION); i++) {
 			double xPos = random.nextDouble()*envWidth;
 			trees.add(new GeneTree(random, (int)(xPos), (int)getGroundLevel(xPos)));
 		}

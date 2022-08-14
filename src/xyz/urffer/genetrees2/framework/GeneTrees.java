@@ -11,7 +11,6 @@ import javax.swing.SwingUtilities;
 import xyz.urffer.urfutils.grapher.GraphPanel;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.6.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	
@@ -46,7 +45,7 @@ public class GeneTrees implements Runnable {
 
 	@Override
 	public void run() {
-		frame = new JFrame("GeneTrees2 " + ver);
+		frame = new JFrame("GeneTrees-v2");
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
