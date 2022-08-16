@@ -24,16 +24,18 @@ public class ParameterLoader {
 	public static Object getParam(String category, String fieldName) {
 		if (params == null) {
 			try {
-				Object obj = new JSONParser().parse(new FileReader(paramFileName));
-				params = (JSONObject) obj;
+				params = loadParams();
 			} catch (IOException | ParseException e) {
-				params = generateParams();
-				saveParams();
+				JSONObject tempParams = generateParams();
+				saveParams(tempParams);
 			}
 		}
-		JsonParserFactory factory = Json.createParserFactory();
 		
 		try {
+			if (params == null) {
+				params = loadParams();
+			}
+			
 			JSONObject categoryJson = (JSONObject)params.get(category);
 			return categoryJson.get(fieldName);
 		} catch (Exception e) {
@@ -130,10 +132,15 @@ public class ParameterLoader {
 		return out;
 	}
 	
-	private static void saveParams() {
+	private static JSONObject loadParams() throws FileNotFoundException, IOException, ParseException {
+		Object obj = new JSONParser().parse(new FileReader(paramFileName));
+		return (JSONObject) obj;
+	}
+	
+	private static void saveParams(JSONObject parameterObj) {
 		try {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			JsonElement je = JsonParser.parseString(params.toJSONString());
+			JsonElement je = JsonParser.parseString(parameterObj.toJSONString());
 			String prettyJsonString = gson.toJson(je);
 			PrintWriter pw = new PrintWriter(paramFileName);
 	        pw.write(prettyJsonString);
@@ -144,5 +151,9 @@ public class ParameterLoader {
 			e.printStackTrace();
 		}
 	}
+	
+//	public static long getSimulationSeed() {
+//		
+//	}
 	
 }

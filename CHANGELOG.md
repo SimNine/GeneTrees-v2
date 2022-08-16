@@ -11,7 +11,9 @@ This project **does not** adhere to [Semantic Versioning](https://semver.org/spe
 This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1 simulated only one tree at a time, GeneTrees-v2 simulates many trees at once, thus allowing interaction between trees.
 
 ## [Unreleased]
-- Nothing yet
+- Added parameter configuration file
+	- Includes configuration settings for all environment, mutation, and fitness parameters
+	- Quite inefficient at the moment
 
 ## [0.7.0] - 2022-08-05
 
@@ -90,7 +92,7 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 
 ### Changed
 - Complete overhaul of the save system so that long-term runs can be carried out
-	
+
 ## [0.3.0] - 2017-09-29
 
 ### Added
@@ -106,7 +108,7 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 ### Added
 - Multithreading functionality
 	- Multithreading can be toggled on by pressing "m"
-	- Per tick, one thread computes collisions of SunSpecks with trees, 
+	- Per tick, one thread computes collisions of SunSpecks with trees,
 	while another thread computes collisions of RainDrops with trees
 
 ## [0.2.0] - 2017-09-16
@@ -135,7 +137,7 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
  - Trees are generated and simulated concurrently
 
 ### Changed
- - Structure nodes now consume 4x as much fitness as leaf or root nodes; 
+ - Structure nodes now consume 4x as much fitness as leaf or root nodes;
  - One sunlight and one nutrient are now converted into 4 fitness
 
 [UrfJavaUtils]: https://github.com/SimNine/UrfJavaUtils

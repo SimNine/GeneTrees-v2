@@ -71,7 +71,7 @@ public class TreeNode {
 		this.owner = owner;
 		this.pos = new int[]{x, y};
 		
-		this.size = (int)(random.nextDouble()*9.0) + (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
+		this.size = (int)(random.nextDouble()*9.0) + (int)(long)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
 		this.type = NodeType.values()[(int)(random.nextDouble()*4.0)];
 		this.dist = random.nextDouble()*30.0 + (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_DISTANCE);
 		this.angle = (int)(random.nextDouble()*360.0);
@@ -104,8 +104,8 @@ public class TreeNode {
 			int sizeInc = (int)(random.nextDouble()*16.0) - 16;
 			this.size += sizeInc;
 			
-			if (this.size < (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)) {
-				this.size = (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
+			if (this.size < (int)(long)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)) {
+				this.size = (int)(long)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE);
 			}
 		}
 		

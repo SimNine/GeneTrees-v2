@@ -155,17 +155,17 @@ public class GeneTree implements Comparable<GeneTree> {
 				double distanceUnderground = (n.getPos()[1] + n.getSize() / 2) - 
 											 GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2);
 				nutrients += ((double)ParameterLoader.getParam("fitness", ParameterNames.NODE_ROOT_NUTRIENT_COLLECTION_PER_SIZE) * n.getSize() *
-							  distanceUnderground * (double)ParameterLoader.getParam("mutation", ParameterNames.NODE_ROOT_NUTRIENT_COLLECTION_PER_DEPTH));
+							  distanceUnderground * (double)ParameterLoader.getParam("fitness", ParameterNames.NODE_ROOT_NUTRIENT_COLLECTION_PER_DEPTH));
 			}
 
 			// decrement fitness proportional to the size of this node,
 			// moreso if it is a structure node
 			if (n.getType() == NodeType.Struct) {
-				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_STRUCT_FITNESS_DECAY_PER_SIZE);
+				fitness -= n.getSize() * (int)(long)ParameterLoader.getParam("fitness", ParameterNames.NODE_STRUCT_FITNESS_DECAY_PER_SIZE);
 			} else if (n.isActivated()) {
-				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE);
+				fitness -= n.getSize() * (int)(long)ParameterLoader.getParam("fitness", ParameterNames.NODE_ACTIVE_FITNESS_DECAY_PER_SIZE);
 			} else {
-				fitness -= n.getSize() * (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE);
+				fitness -= n.getSize() * (int)(long)ParameterLoader.getParam("fitness", ParameterNames.NODE_INACTIVE_FITNESS_DECAY_PER_SIZE);
 			}
 		}
 
@@ -174,7 +174,7 @@ public class GeneTree implements Comparable<GeneTree> {
 		if (newFitness > 0) {
 			energy -= newFitness;
 			nutrients -= newFitness;
-			fitness += (int)ParameterLoader.getParam("mutation", ParameterNames.TREE_FITNESS_GAIN_PER_NUTRIENT_AND_POWER) * newFitness;
+			fitness += (int)(long)ParameterLoader.getParam("fitness", ParameterNames.TREE_FITNESS_GAIN_PER_NUTRIENT_AND_POWER) * newFitness;
 		}
 	}
 

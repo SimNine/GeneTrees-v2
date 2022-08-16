@@ -85,7 +85,7 @@ public class Simulation {
 		
 		// create a thread pool
 		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(
-				(int)ParameterLoader.getParam("simulation", ParameterNames.NUM_THREADS)
+				(int)(long)ParameterLoader.getParam("simulation", ParameterNames.NUM_THREADS)
 		);
 		
 		// create the environment
@@ -105,13 +105,13 @@ public class Simulation {
 				   		   random.nextDouble()*500,
 				   		   random.nextDouble()*500 };
 		env = new Environment(random, 
-							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_WIDTH), 
-							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_HEIGHT), 
-							  (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_GROUND_ELEVATION), 
+							  (int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_WIDTH), 
+							  (int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_HEIGHT), 
+							  (int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_GROUND_ELEVATION), 
 							  gFreq, gAmp, gDisp);
 		
 		// warm up the environment
-		warmupEnvironment((int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_NUM_WARMUP_TICKS));
+		warmupEnvironment((int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_NUM_WARMUP_TICKS));
 		
 		// start the tick thread
 		tickThread.start();
@@ -215,7 +215,7 @@ public class Simulation {
 		
 		// After a certain number of ticks, try to reproduce or kill each tree
 		tickCount++;
-		if (tickCount % (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_TICKS_PER_GENERATION) == 0) {
+		if (tickCount % (int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_TICKS_PER_GENERATION) == 0) {
 			updateGraphs();
 			advanceGeneration();
 		}
@@ -245,15 +245,15 @@ public class Simulation {
 		}
 	}
 	
-	private void removeZeroEnergyParticles(HashSet<? extends Particle> particles) {
-		HashSet<Particle> remParticles = new HashSet<Particle>();
-		for (Particle p : particles) {
-			if (p.getPower() <= 0) {
-				remParticles.add(p);
-			}
-		}
-		particles.removeAll(remParticles);
-	}
+//	private void removeZeroEnergyParticles(HashSet<? extends Particle> particles) {
+//		HashSet<Particle> remParticles = new HashSet<Particle>();
+//		for (Particle p : particles) {
+//			if (p.getPower() <= 0) {
+//				remParticles.add(p);
+//			}
+//		}
+//		particles.removeAll(remParticles);
+//	}
 	
 	private void collideParticlesWithGround(HashSet<? extends Particle> particles) {
 		HashSet<Particle> remParticles = new HashSet<Particle>();
@@ -464,9 +464,9 @@ public class Simulation {
 //				if (newTree.getxMin() < env.getEnvWidth() && newTree.getxMax() > 0)
 //					toAdd.add(newTree);
 //			}
-			for (long i = t.getFitness(); i > 0; i -= (int)ParameterLoader.getParam("fitness", ParameterNames.TREE_FITNESS_PER_CHILD_PER_NODE) * t.getNumNodes()) {
+			for (long i = t.getFitness(); i > 0; i -= (int)(long)ParameterLoader.getParam("fitness", ParameterNames.TREE_FITNESS_PER_CHILD_PER_NODE) * t.getNumNodes()) {
 				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
-				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE));
+				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - (int)(long)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE));
 				if (newTree.getRoot().getPos()[0] < env.getEnvWidth() && newTree.getRoot().getPos()[0] > 0)
 					toAdd.add(newTree);
 			}
@@ -475,9 +475,9 @@ public class Simulation {
 		trees.addAll(toAdd);
 		
 		// Add a certain number of completely random trees regardless of circumstance
-		for (int i = 0; i < (int)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION); i++) {
+		for (int i = 0; i < (int)(long)ParameterLoader.getParam("environment", ParameterNames.ENVIRONMENT_SPONTANEOUS_TREES_PER_GENERATION); i++) {
 			double xPos = random.nextDouble()*env.getEnvWidth();
-			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - (int)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)));
+			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - (int)(long)ParameterLoader.getParam("mutation", ParameterNames.NODE_MINIMUM_SIZE)));
 		}
 	}
 	
