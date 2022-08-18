@@ -33,8 +33,8 @@ public class GeneTreesPanel extends PannablePanel {
 	public GeneTreesPanel(int width, int height) {
 		super(width, height, true);
 		
-		sim = new Simulation((long)ParameterLoader.getParam("simulation", ParameterNames.SIMULATION_SEED), 
-							 (boolean)ParameterLoader.getParam("simulation", ParameterNames.TAKE_SNAPSHOTS));
+		sim = new Simulation(ParametersLoader.getParams().simSeed, 
+							 ParametersLoader.getParams().simTakeSnapshots);
 		
 		addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {

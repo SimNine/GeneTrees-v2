@@ -11,6 +11,8 @@ import javax.swing.SwingUtilities;
 import xyz.urffer.urfutils.grapher.GraphPanel;
 
 public class GeneTrees implements Runnable {
+	public static GeneTrees self = new GeneTrees();
+	
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	
@@ -40,6 +42,8 @@ public class GeneTrees implements Runnable {
 	public static boolean debug = false;
 
 	public static void main(String[] args) {
+		ParametersLoader.loadYaml();
+		
 		SwingUtilities.invokeLater(new GeneTrees());
 	}
 
