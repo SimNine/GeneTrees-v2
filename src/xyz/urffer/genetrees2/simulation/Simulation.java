@@ -128,7 +128,7 @@ public class Simulation {
 			HashSet<SunSpeck> remSun = new HashSet<SunSpeck>();
 			for (SunSpeck s : env.getSun()) { // for each sunspeck
 				s.tick(); // tick each sunspeck
-				if (s.getYPos() > env.getGroundLevel(s.getXPos())) { // check if sunspeck has hit ground
+				if (s.getYPos() > env.getLandscape().getGroundLevel(s.getXPos())) { // check if sunspeck has hit ground
 					remSun.add(s);
 				}
 			}
@@ -145,7 +145,7 @@ public class Simulation {
 			HashSet<RainDrop> remRain = new HashSet<RainDrop>();
 			for (RainDrop d : env.getRain()) { // for each raindrop
 				d.tick(); // tick each raindrop
-				if (d.getYPos() > env.getGroundLevel(d.getXPos())) { // check if raindrop has hit ground
+				if (d.getYPos() > env.getLandscape().getGroundLevel(d.getXPos())) { // check if raindrop has hit ground
 					remRain.add(d);
 				}
 			}
@@ -255,7 +255,7 @@ public class Simulation {
 	private void collideParticlesWithGround(HashSet<? extends Particle> particles) {
 		HashSet<Particle> remParticles = new HashSet<Particle>();
 		for (Particle p : particles) { // for each particle
-			if (p.getYPos() > env.getGroundLevel(p.getXPos())) { // check if particle has hit ground
+			if (p.getYPos() > env.getLandscape().getGroundLevel(p.getXPos())) { // check if particle has hit ground
 				remParticles.add(p);
 			}
 		}
@@ -463,7 +463,7 @@ public class Simulation {
 //			}
 			for (long i = t.getFitness(); i > 0; i -= ParametersLoader.getParams().fitnessRequirementPerChildPerNode * t.getNumNodes()) {
 				double newXPos = t.getRoot().getPos()[0] + t.getRoot().getSize()/2 + (random.nextDouble()-0.5)*200;
-				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getGroundLevel(newXPos) - ParametersLoader.getParams().constantNodeMinimumSize);
+				GeneTree newTree = new GeneTree(random, t, (int)newXPos, (int)env.getLandscape().getGroundLevel(newXPos) - ParametersLoader.getParams().constantNodeMinimumSize);
 				if (newTree.getRoot().getPos()[0] < env.getEnvWidth() && newTree.getRoot().getPos()[0] > 0)
 					toAdd.add(newTree);
 			}
@@ -474,7 +474,7 @@ public class Simulation {
 		// Add a certain number of completely random trees regardless of circumstance
 		for (int i = 0; i < ParametersLoader.getParams().envSpontaneousTreesPerGen; i++) {
 			double xPos = random.nextDouble()*env.getEnvWidth();
-			trees.add(new GeneTree(random, (int)(xPos), (int)env.getGroundLevel(xPos) - ParametersLoader.getParams().constantNodeMinimumSize));
+			trees.add(new GeneTree(random, (int)(xPos), (int)env.getLandscape().getGroundLevel(xPos) - ParametersLoader.getParams().constantNodeMinimumSize));
 		}
 	}
 	
@@ -515,7 +515,7 @@ public class Simulation {
 		g.fillRect(0, 0, viewportWidth, viewportHeight);
 		
 		// draw the ground
-		g.drawImage(env.getGroundImg(), -xDisp, -yDisp, null);
+		g.drawImage(env.getLandscape().getGroundImg(), -xDisp, -yDisp, null);
 		
 		try {
 			// draw each tree
