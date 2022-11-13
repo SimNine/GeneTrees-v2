@@ -149,10 +149,10 @@ public class GeneTree implements Comparable<GeneTree> {
 		for (TreeNode n : root.getDescendants()) {
 			// if this is a root node, and it is belowground, gradually increment its fitness
 			if (n.getType() == NodeType.Root && 
-				n.getPos()[1] + n.getSize() / 2 > GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2)) {
+				n.getPos()[1] + n.getSize() / 2 > GeneTrees.panel.getSimulation().getEnv().getLandscape().getGroundLevel(n.getPos()[0] + n.getSize()/2)) {
 				n.setActivated(true);
 				double distanceUnderground = (n.getPos()[1] + n.getSize() / 2) - 
-											 GeneTrees.panel.getSimulation().getEnv().getGroundLevel(n.getPos()[0] + n.getSize()/2);
+											 GeneTrees.panel.getSimulation().getEnv().getLandscape().getGroundLevel(n.getPos()[0] + n.getSize()/2);
 				nutrients += (ParametersLoader.getParams().fitnessRootNutrientCollectionPerSize * n.getSize() *
 							  distanceUnderground * ParametersLoader.getParams().fitnessRootNutrientCollectionPerDepth);
 			}
