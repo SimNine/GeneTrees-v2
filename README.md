@@ -9,6 +9,8 @@ mutates them based on fitness, simulating evolution.
 - Download [GeneTrees-v2 jar file](https://github.com/SimNine/GeneTrees-v2/releases/latest)
 - Run GeneTrees-v2 jar file
 
+Optional: configure parameters by editing `treeConfig.yaml`
+
 ## Controls
 Main window:
  - Click and drag - pan view

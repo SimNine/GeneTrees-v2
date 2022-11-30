@@ -11,9 +11,16 @@ This project **does not** adhere to [Semantic Versioning](https://semver.org/spe
 This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1 simulated only one tree at a time, GeneTrees-v2 simulates many trees at once, thus allowing interaction between trees.
 
 ## [Unreleased]
-- Added parameter configuration file
+- Nothing yet
+
+## [0.8.0] - 2022-11-30
+
+### Added
+- Parameter configuration file
 	- Includes configuration settings for all environment, mutation, and fitness parameters
-	- Quite inefficient at the moment
+	
+### Removed
+- Vestigial (broken) functionality of saver/loader
 
 ## [0.7.0] - 2022-08-05
 
@@ -142,7 +149,8 @@ This is a branch of GeneTrees-v1, forked after its 0.4.0 tag. Where GeneTrees-v1
 
 [UrfJavaUtils]: https://github.com/SimNine/UrfJavaUtils
 
-[Unreleased]: https://github.com/SimNine/GeneTrees-v2/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/SimNine/GeneTrees-v2/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/SimNine/GeneTrees-v2/compare/v0.4.0...v0.5.0
