@@ -57,7 +57,7 @@ public class Landscape {
 	}
 	
 	public int getGroundLevel(double xPos) {
-		if (xPos < 0 || xPos > this.groundImg.getWidth()) {
+		if (xPos < 0 || xPos >= this.groundImg.getWidth()) {
 			return 0;
 		}
 		return this.groundLevels[(int)xPos];
