@@ -11,7 +11,7 @@ import xyz.urffer.genetrees2.environment.Environment;
 
 public class Snapshotter {
 	
-	public static String SNAPSHOT_FOLDER = "snapshots";
+	public static final String SNAPSHOT_FOLDER = "snapshots";
 	
 	private String runIdentifier;
 	private long generationSnapshotIncrement = 0;

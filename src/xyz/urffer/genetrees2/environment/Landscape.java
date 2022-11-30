@@ -35,16 +35,25 @@ public class Landscape {
 		
 		// create the tile contents and background image
 		tileType = new int[sWidth][sHeight];
-		groundImg = new BufferedImage(sWidth, sHeight, BufferedImage.TYPE_4BYTE_ABGR);
-		for (int x = 0; x < groundImg.getWidth(); x++) {
+		for (int x = 0; x < tileType.length; x++) {
 			double m = getAlgorithmicGroundLevel(x);
 			
-			for (int y = (int)m; y < groundImg.getHeight(); y++) {
-				groundImg.setRGB(x, y, new Color(183, 85, 23).getRGB());
+			for (int y = (int)m; y < tileType[0].length; y++) {
 				tileType[x][y] = 1;
 			}
 		}
 		
+		// create the background image from the tileType map
+		groundImg = new BufferedImage(tileType.length, tileType[0].length, BufferedImage.TYPE_4BYTE_ABGR);
+		for (int x = 0; x < tileType.length; x++) {
+			for (int y = 0; y < tileType[0].length; y++) {
+				if (tileType[x][y] == 1) {
+					groundImg.setRGB(x, y, new Color(183, 85, 23).getRGB());
+				}
+			}
+		}
+		
+		// cache ground levels
 		groundLevels = new int[sWidth];
 		for (int x = 0; x < sWidth; x++) {
 			ArrayList<Integer> groundLevels = getGroundLevels(x);
@@ -53,11 +62,15 @@ public class Landscape {
 	}
 	
 	public boolean isGround(int x, int y) {
+		if (x < 0 || x >= this.tileType.length ||
+			y < 0 || y >= this.tileType[0].length) {
+			return false;
+		}
 		return tileType[x][y] == 1;
 	}
 	
 	public int getGroundLevel(double xPos) {
-		if (xPos < 0 || xPos >= this.groundImg.getWidth()) {
+		if (xPos < 0 || xPos >= this.tileType.length) {
 			return 0;
 		}
 		return this.groundLevels[(int)xPos];

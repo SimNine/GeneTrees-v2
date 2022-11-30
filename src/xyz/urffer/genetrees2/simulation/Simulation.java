@@ -255,7 +255,7 @@ public class Simulation {
 	private void collideParticlesWithGround(HashSet<? extends Particle> particles) {
 		HashSet<Particle> remParticles = new HashSet<Particle>();
 		for (Particle p : particles) { // for each particle
-			if (p.getYPos() > env.getLandscape().getGroundLevel(p.getXPos())) { // check if particle has hit ground
+			if (env.getLandscape().isGround(p.getXPos(), p.getYPos())) { // check if particle has hit ground
 				remParticles.add(p);
 			}
 		}
