@@ -11,6 +11,8 @@ import xyz.urffer.genetrees2.environment.Environment;
 
 public class Snapshotter {
 	
+	public static String SNAPSHOT_FOLDER = "snapshots";
+	
 	private String runIdentifier;
 	private long generationSnapshotIncrement = 0;
 	
@@ -25,11 +27,17 @@ public class Snapshotter {
 		Graphics2D imageGraphics = image.createGraphics();
 		sim.draw(imageGraphics, 0, 0, env.getEnvWidth(), env.getEnvHeight());
 		
-		if (!new File("./" + this.runIdentifier + "/").exists()) {
-			new File("./" + this.runIdentifier + "/").mkdir();
+		File snapshotDirectory = new File("./" + Snapshotter.SNAPSHOT_FOLDER + "/");
+		if (!snapshotDirectory.exists() && !snapshotDirectory.isDirectory()) {
+			snapshotDirectory.mkdir();
+		}
+		
+		File runDirectory = new File(snapshotDirectory.getPath() + "/" + this.runIdentifier + "/");
+		if (!runDirectory.exists() && !runDirectory.isDirectory()) {
+			runDirectory.mkdir();
 		}
 	    try {
-            if (ImageIO.write(image, "png", new File("./" + this.runIdentifier + "/" + this.generationSnapshotIncrement + ".png"))) {
+            if (ImageIO.write(image, "png", new File(runDirectory.getPath() + "/" + this.generationSnapshotIncrement + ".png"))) {
                 System.out.println("environment image saved");
                 this.generationSnapshotIncrement++;
             }

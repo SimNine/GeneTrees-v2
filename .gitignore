@@ -28,3 +28,4 @@ archive/
 .project
 .settings/
 /target/
+/snapshots/
